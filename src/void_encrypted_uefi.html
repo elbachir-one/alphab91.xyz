@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Void Linux Encrypted UEFI Install Guide</title>
+		<link rel="stylesheet" href="void_encrypted_uefi.css">
+	</head>
+	<body>
+
+		<input type="checkbox" id="nav-toggle" hidden>
+		<label for="nav-toggle" class="nav-toggle-label">&#9776; Menu</label>
+
+		<nav>
+			<h2>Sections</h2>
+			<a href="#prepare-media">1. Prepare Installation Media</a>
+			<a href="#boot-setup">2. Boot and Initial Setup</a>
+			<a href="#partition-disk">3. Partition the Disk</a>
+			<a href="#encrypt-format">4. Encrypt and Format Partitions</a>
+			<a href="#copy-keys">5. Copy RSA Keys</a>
+			<a href="#install-base">6. Install Base System</a>
+			<a href="#chroot">7. Chroot into the New System</a>
+			<a href="#grub-config">8. Configure GRUB for Encryption</a>
+			<a href="#keyfile">9. Add a Keyfile</a>
+			<a href="#install-grub">10. Install GRUB</a>
+			<a href="#post-install">11. Post-Installation</a>
+		</nav>
+
+		<main>
+			<h1>How to Set Up a Void Linux Box with Encrypted Drive on UEFI</h1>
+
+			<section id="prepare-media">
+				<h2>1. Prepare Installation Media</h2>
+				<ul>
+					<li>Download the ISO from <a class="external" href="https://voidlinux.org/">voidlinux.org</a>.</li>
+					<li>Put the ISO onto a USB drive using <code>dd</code>. On Windows, you can use <a class="external" href="https://rufus.ie/">Rufus</a>.</li>
+				</ul>
+			</section>
+
+			<section id="boot-setup">
+				<h2>2. Boot and Initial Setup</h2>
+				<ul>
+					<li>Boot from the USB drive.</li>
+					<li>Login as <code>root</code> (password: <code>voidlinux</code>).</li>
+					<li>Sync the repositories and update the package manager:
+						<pre><code># xbps-install -S</code></pre>
+<pre><code># xbps-install -u xbps</code></pre></li>
+						<li>Install a text editor:
+							<pre><code># xbps-install -S nano</code></pre></li>
+				<div class="ok">
+					<p>Install any text editor you feel like using.</p>
+				</div>
+
+				</ul>
+			</section>
+
+			<section id="partition-disk">
+				<h2>3. Partition the Disk</h2>
+				<ul>
+					<li>Identify your target drive (<code>/dev/sda</code>, <code>/dev/nvme0</code>, etc.).</li>
+					<li>Partition the drive using <code>cfdisk</code>. Create at least:
+						<ul>
+							<li>An EFI partition</li>
+							<li>A root partition</li>
+						</ul>
+					</li>
+				</ul>
+				<div class="ok">
+					<p>Optional: <strong>swap</strong> and <strong>home</strong> partitions depending on your preference.</p>
+				</div>
+			</section>
+
+			<section id="encrypt-format">
+				<h2>4. Encrypt and Format Partitions</h2>
+				<ul>
+					<li>Encrypt the root partition:
+						<pre><code># cryptsetup luksFormat --type luks1 /dev/sda2</code></pre>
+						Type <strong>YES</strong> in all caps and enter your passphrase.
+					</li>
+					<li>Open the encrypted partition:
+						<pre><code># cryptsetup luksOpen /dev/sda2 cryptroot</code></pre>
+					</li>
+					<li>Create a volume group:
+						<pre><code># vgcreate cryptroot /dev/mapper/cryptroot</code></pre>
+					</li>
+					<li>Create a logical volume:
+						<pre><code># lvcreate --name root -l 100%FREE cryptroot</code></pre>
+					</li>
+				<div class="note">
+					<p>If you created a <strong>home</strong> partition, you should allocate the remaining disk space accordingly.</p>
+				</div>
+					<li>Format the root filesystem:
+						<pre><code># mkfs.ext4 -L root /dev/cryptroot/root</code></pre>
+<pre><code># mount /dev/cryptroot/root /mnt</code></pre>
+					</li>
+				<div class="warn">
+					<p>The <strong>root</strong> is just a label.</p>
+				</div>
+					<li>Format the EFI partition and mount it:
+						<pre><code># mkfs.vfat /dev/sda1</code></pre>
+<pre><code># mkdir -p /mnt/boot/efi</code></pre>
+<pre><code># mount /dev/sda1 /mnt/boot/efi</code></pre>
+					</li>
+				</ul>
+			</section>
+
+			<section id="copy-keys">
+				<h2>5. Copy RSA Keys</h2>
+				<pre><code># mkdir -p /mnt/var/db/xbps/keys</code></pre>
+
+				<div class="warn">
+					<p>Copying the RSA keys from the installer to the new system</p>
+				</div>
+
+<pre><code># cp /var/db/xbps/keys/* /mnt/var/db/xbps/keys/</code></pre>
+
+			</section>
+
+			<section id="install-base">
+				<h2>6. Install Base System</h2>
+				<pre><code># xbps-install -Sy -R https://repo-default.voidlinux.org/current -r /mnt \
+base-system lvm2 cryptsetup grub-x86_64-efi nano NetworkManager efibootmgr</code></pre>
+
+				<div class="ok">
+					<p>After that, let’s generate the fstab.</p>
+				<pre><code># xgenfstab /mnt > /mnt/etc/fstab</code></pre>
+				</div>
+			</section>
+
+			<section id="chroot">
+				<h2>7. Chroot into the New System</h2>
+				<div class="ok">
+					<p>Using xchroot to enter the new system.</p>
+				<pre><code># xchroot /mnt</code></pre>
+				</div>
+<pre><code>[xchroot /mnt] # chown root:root /</code></pre>
+<pre><code>[xchroot /mnt] # chmod 755 /</code></pre>
+				<div class="ok">
+					<p>Give the root user a password.</p>
+<pre><code>[xchroot /mnt] # passwd root</code></pre>
+				</div>
+
+				<div class="ok">
+					<p>Set your hostname by replacing <strong>VOID</strong> with your desired name.</p>
+<pre><code>[xchroot /mnt] # echo VOID > /etc/hostname</code></pre>
+				</div>
+
+				<div class="note">
+					For locale configuration <strong>(glibc only)</strong>:
+					<pre><code>[xchroot /mnt] # echo "LANG=en_US.UTF-8" > /etc/locale.conf</code>
+<code>[xchroot /mnt] # echo "en_US.UTF-8 UTF-8" >> /etc/default/libc-locales</code></pre>
+
+				<div class="warn">
+					<p>Set the locale by replacing <strong>en_US.UTF-8</strong> with your preferred language.</p>
+				</div>
+
+<pre><code>[xchroot /mnt] # xbps-reconfigure -f glibc-locales</code></pre>
+
+				<div class="ok">
+					<p>Reconfigure the locales.</p>
+				</div>
+			</section>
+
+			<section id="grub-config">
+				<h2>8. Configure GRUB for Encryption</h2>
+				<p>This enables GRUB to recognize LUKS-encrypted partitions at boot, allowing you to enter the passphrase early.</p>
+				<pre><code>[xchroot /mnt] # echo GRUB_ENABLE_CRYPTODISK=y >> /etc/default/grub</code></pre>
+				<p>The next command outputs the UUID of your root partition.</p>
+<pre><code>[xchroot /mnt] # blkid -o value -s UUID /dev/sda2</code></pre>
+
+				<p>Edit the grub config file and add the UUID:</p>
+				<pre><code>[xchroot /mnt] # nano /etc/default/grub</code></pre>
+				<pre><code>GRUB_CMDLINE_LINUX_DEFAULT="loglevel=4 rd.lvm.vg=cryptroot rd.luks.uuid=&lt;uuid&gt;"</code></pre>
+
+				<div class="red">
+					<p>Replace <strong>&lt;uuid&gt;</strong> with the value you got from <strong>(<code>blkid -o value -s UUID /dev/sda2</code>)</strong>.</p>
+				</div>
+
+				<div class="note">
+<p>
+If you don’t know how to add the <strong>UUID</strong> to that GRUB line, you can run the following command:
+<pre><code>[xchroot /mnt] # sed -i "s|^GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=4 rd.lvm.vg=cryptroot rd.luks.uuid=$(blkid -o value -s UUID /dev/sda2)\"|" /etc/default/grub</code></pre>
+This will automate the process for you, so you don’t have to open the GRUB config file manually. However, you can still open it if you want to double-check.
+</p>
+				<div class="red">
+					<p>Replace <strong>sda2</strong> with your own root partition.</p>
+				</div>
+
+				</div>
+			</section>
+
+			<section id="keyfile">
+				<h2>9. Add a Keyfile</h2>
+				<div class="warn">
+					<p>The following command is creating a random key file and saving it to <code>/boot/volume.key</code>.</p>
+				<pre><code>[xchroot /mnt] # dd bs=1 count=64 if=/dev/urandom of=/boot/volume.key</code></pre>
+				</div>
+				<div class="warn">
+					<p>Adding the key.</p>
+<pre><code>[xchroot /mnt] # cryptsetup luksAddKey /dev/sda2 /boot/volume.key</code></pre>
+				</div>
+
+				<div class="warn">
+					<p>These two commands set the correct permissions for the key file.</p>
+<pre><code>[xchroot /mnt] # chmod 000 /boot/volume.key</code>
+<code>[xchroot /mnt] # chmod -R g-rwx,o-rwx /boot</code></pre>
+				</div>
+
+				<p>Edit the <strong>crypttab</strong> file and add the following line to the file:</p>
+				<pre><code>[xchroot /mnt] # nano /etc/crypttab</code></pre>
+				<pre><code>cryptroot      /dev/sda2      /boot/volume.key     luks</code></pre>
+
+				<div class="note">
+					<p>Use your device name instead of <strong>sda2</strong>.</p>
+				</div>
+
+				<p>Edit the <strong>crypt.conf</strong> file and add the following line to the file:</p>
+				<pre><code>[xchroot /mnt] # nano /etc/dracut.conf.d/10-crypt.conf</code></pre>
+				<pre><code>install_items+=" /boot/volume.key /etc/crypttab "</code></pre>
+			</section>
+
+			<section id="install-grub">
+				<h2>10. Install GRUB</h2>
+				<div class="note">
+					<p>Make sure that the device name is correct.</p>
+					<pre><code>[xchroot /mnt] # grub-install /dev/sda</code></pre>
+				</div>
+				<div class="warn">
+					<p>Reconfigures everything and regenerates the GRUB configuration file.</p>
+					<pre><code>[xchroot /mnt] # xbps-reconfigure -fa</code></pre>
+				</div>
+				<div class="ok">
+					<p>To exit the chroot</p>
+					<pre><code>[xchroot /mnt] # exit</code></pre>
+				</div>
+				<div class="ok">
+					<p>Recursively unmount everything mounted under <code>/mnt</code></p>
+					<pre><code># umount -R /mnt</code></pre>
+				</div>
+				<div class="ok">
+				<pre><code># reboot</code></pre>
+					<p>You should remove the installation media.</p>
+				</div>
+			</section>
+
+			<section id="post-install">
+				<h2>11. Post-Installation</h2>
+				<div class="ok">
+					<p>After rebooting, entering the passphrase, seeing the GRUB menu, and logging in as root, you should enable the network service.</p>
+				<pre><code># ln -s /etc/sv/NetworkManager /var/service/</code></pre>
+<pre><code># ln -s /etc/sv/dbus /var/service/</code></pre>
+				</div>
+				<div class="ok">
+					<p>To start the network manager and dbus services.</p>
+<pre><code># sv up NetworkManager</code></pre>
+<pre><code># sv up dbus</code></pre>
+
+				</div>
+
+				<div class="ok">
+					<p>If you are using an Ethernet cable, it connects automatically. For <strong>Wi-Fi</strong>, run <code>nmtui</code> and activate a connection.</p>
+				</div>
+
+				<div class="warn">
+					<p>Edit the <code>resolv.conf</code>file</p>
+				</div>
+				<pre><code># nano /etc/resolv.conf</code></pre>
+				<pre><code>nameserver 1.1.1.1</code>
+<code>nameserver 8.8.8.8</code></pre>
+
+				<div class="ok">
+					<p>To test the connection, run the following command.</p>
+				<pre><code># ping -c4 voidlinux.org</code></pre>
+				</div>
+
+<p>Add a new user to your system. The <code>-m</code> option creates a home directory, and <code>-G wheel</code> adds the user to the <code>wheel</code> group (which allows administrative privileges):</p>
+<pre><code># useradd -mG wheel &lt;yourUserName&gt;</code>
+<code># passwd &lt;yourUserName&gt;</code>
+</pre>
+				<div class="note">
+					<p>Replace <code>&lt;yourUserName&gt;</code> with the username you want to create and use.</p>
+				</div>
+
+<p>Now, edit the sudoers file to give the new user permission to use <code>sudo</code>. Here we set the default editor to <code>nano</code>:</p>
+<pre><code># EDITOR=nano visudo</code></pre>
+
+<p>Inside the file, find the following line and uncomment it by removing the <code>#</code> at the beginning:</p>
+<pre><code>%wheel ALL=(ALL:ALL) ALL</code></pre>
+
+<p>This allows any user in the <code>wheel</code> group to execute commands as root using <code>sudo</code>.</p>
+
+				<p>Install some utilities:</p>
+				<pre><code># sudo xbps-install -S htop ufetch</code></pre>
+<pre><code># ufetch</code></pre>
+
+			</section>
+
+			<section>
+				<p class="warn"><strong>Et voilà!</strong> You now have a base Void Linux system with full disk encryption.</p>
+			</section>
+
+		</main>
+
+	</body>
+</html>

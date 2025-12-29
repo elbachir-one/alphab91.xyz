@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>dwm — Keybindings (Pretty)</title>
+		<link rel="stylesheet" href="dwm_keybindings.css">
+	</head>
+	<body>
+		<div class="wrap">
+			<header>
+				<div class="logo">dwm</div>
+				<div>
+					<h1>dwm — Keybindings</h1>
+					<p class="lead">A well-organized, searchable cheat sheet for my custom DWM keybindings.</p>
+				</div>
+			</header>
+
+			<div class="controls">
+				<div class="search">
+					<svg width="16" height="16" viewBox="0 0 24 24" style="opacity:.8;margin-right:8px"><path fill="currentColor" d="M21 20l-5.6-5.6A7 7 0 1 0 20 21z"></path></svg>
+					<input id="filter" placeholder="Filter by key, function, modifier or argument..." autofocus />
+				</div>
+				<div class="kbd">Mod = MODKEY</div>
+				<div class="kbd">C = Control</div>
+				<div class="kbd">S = Shift</div>
+			</div>
+
+			<table id="bindings">
+				<thead>
+					<tr>
+						<th style="width:18%">Modifier</th>
+						<th style="width:12%">Key</th>
+						<th style="width:28%">Function</th>
+						<th>Argument / Command</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr><td class="mono">MODKEY</td><td class="mono">z</td><td class="func">spawn</td><td class="arg">boomercmd</td></tr>
+					<tr><td class="mono">MODKEY + C</td><td class="mono">w</td><td class="func">spawn</td><td class="arg">appcmd</td></tr>
+					<tr><td class="mono">MODKEY + C</td><td class="mono">m</td><td class="func">spawn</td><td class="arg">mntcmd</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">b</td><td class="func">spawn</td><td class="arg">bkmarkscmd</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">Insert</td><td class="func">spawn</td><td class="arg">bkmarkpcmd</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">x</td><td class="func">spawn</td><td class="arg">dowcmd</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">y</td><td class="func">spawn</td><td class="arg">ytcmd</td></tr>
+					<tr><td class="mono">MODKEY + C</td><td class="mono">d</td><td class="func">spawn</td><td class="arg">ytdcmd</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">f</td><td class="func">spawn</td><td class="arg">searchcmd</td></tr>
+					<tr><td class="mono">MODKEY + S</td><td class="mono">f</td><td class="func">spawn</td><td class="arg">flamcmd</td></tr>
+					<tr><td class="mono">MODKEY + S</td><td class="mono">p</td><td class="func">spawn</td><td class="arg">boatcmd</td></tr>
+					<tr><td class="mono">MODKEY + S</td><td class="mono">l</td><td class="func">spawn</td><td class="arg">lockcmd</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">w</td><td class="func">spawn</td><td class="arg">chrocmd</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">v</td><td class="func">spawn</td><td class="arg">virtcmd</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">r</td><td class="func">spawn</td><td class="arg">rancmd</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">e</td><td class="func">spawn</td><td class="arg">ncmcmd</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">p</td><td class="func">spawn</td><td class="arg">dmenucmd</td></tr>
+					<tr><td class="mono">MODKEY + S</td><td class="mono">Return</td><td class="func">spawn</td><td class="arg">termcmd</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">n</td><td class="func">spawn</td><td class="arg">clipcmd</td></tr>
+					<tr><td class="mono">MODKEY + S</td><td class="mono">s</td><td class="func">spawn</td><td class="arg">screencmd</td></tr>
+					<tr><td class="mono">MODKEY + C + S</td><td class="mono">r</td><td class="func">spawn</td><td class="arg">reccmd</td></tr>
+					<tr><td class="mono">MODKEY + S</td><td class="mono">w</td><td class="func">spawn</td><td class="arg">wallcmd</td></tr>
+					<tr><td class="mono">MODKEY + S</td><td class="mono">d</td><td class="func">spawn</td><td class="arg">mandcmd</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">d</td><td class="func">spawn</td><td class="arg">mantermcmd</td></tr>
+					<tr><td class="mono">MODKEY + S</td><td class="mono">m</td><td class="func">spawn</td><td class="arg">mojocmd</td></tr>
+					<tr><td class="mono">MODKEY + C + S</td><td class="mono">x</td><td class="func">spawn</td><td class="arg">pkill -SIGINT ffmpeg</td></tr>
+
+					<tr><td class="mono">MODKEY</td><td class="mono">;</td><td class="func">focusmon</td><td class="arg">+1</td></tr>
+					<tr><td class="mono">MODKEY + S</td><td class="mono">;</td><td class="func">tagmon</td><td class="arg">+1</td></tr>
+					<tr><td class="mono">MODKEY + C</td><td class="mono">f</td><td class="func">togglefullscr</td><td class="arg">—</td></tr>
+					<tr><td class="mono">MODKEY + S</td><td class="mono">b</td><td class="func">togglebar</td><td class="arg">—</td></tr>
+					<tr><td class="mono">MODKEY + C</td><td class="mono">s</td><td class="func">togglesticky</td><td class="arg">—</td></tr>
+
+					<tr><td class="mono">MODKEY</td><td class="mono">k</td><td class="func">focusstack</td><td class="arg">+1</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">l</td><td class="func">focusstack</td><td class="arg">-1</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">i</td><td class="func">incnmaster</td><td class="arg">+1</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">o</td><td class="func">incnmaster</td><td class="arg">-1</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">j</td><td class="func">setmfact</td><td class="arg">-0.03</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">m</td><td class="func">setmfact</td><td class="arg">+0.03</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">Return</td><td class="func">zoom</td><td class="arg">—</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">Tab</td><td class="func">view</td><td class="arg">—</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">Space</td><td class="func">setlayout</td><td class="arg">—</td></tr>
+					<tr><td class="mono">MODKEY + S</td><td class="mono">Space</td><td class="func">togglefloating</td><td class="arg">—</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">s</td><td class="func">togglescratch</td><td class="arg">scratchpadcmd</td></tr>
+					<tr><td class="mono">MODKEY + S + C</td><td class="mono">z</td><td class="func">view</td><td class="arg">all tags</td></tr>
+					<tr><td class="mono">MODKEY + S</td><td class="mono">z</td><td class="func">tag</td><td class="arg">all tags</td></tr>
+
+					<tr><td class="mono">MODKEY</td><td class="mono">g</td><td class="func">setgaps</td><td class="arg">-5</td></tr>
+					<tr><td class="mono">MODKEY</td><td class="mono">h</td><td class="func">setgaps</td><td class="arg">+5</td></tr>
+					<tr><td class="mono">MODKEY + S</td><td class="mono">g</td><td class="func">setgaps</td><td class="arg">GAP_RESET</td></tr>
+					<tr><td class="mono">MODKEY + S</td><td class="mono">h</td><td class="func">setgaps</td><td class="arg">GAP_TOGGLE</td></tr>
+					<tr><td class="mono">MODKEY + S</td><td class="mono">c</td><td class="func">killclient</td><td class="arg">—</td></tr>
+
+					<tr><td class="mono">(none)</td><td class="mono">F3</td><td class="func">spawn</td><td class="arg">up</td></tr>
+					<tr><td class="mono">(none)</td><td class="mono">F2</td><td class="func">spawn</td><td class="arg">down</td></tr>
+					<tr><td class="mono">(none)</td><td class="mono">F4</td><td class="func">spawn</td><td class="arg">mut</td></tr>
+					<tr><td class="mono">(none)</td><td class="mono">F6</td><td class="func">spawn</td><td class="arg">toggle</td></tr>
+					<tr><td class="mono">(none)</td><td class="mono">F8</td><td class="func">spawn</td><td class="arg">next</td></tr>
+					<tr><td class="mono">(none)</td><td class="mono">F7</td><td class="func">spawn</td><td class="arg">prev</td></tr>
+
+					<tr><td class="mono">MODKEY + S</td><td class="mono">q</td><td class="func">quit</td><td class="arg">exit code 1</td></tr>
+					<tr><td class="mono">MODKEY + S</td><td class="mono">e</td><td class="func">exitdwm</td><td class="arg">0</td></tr>
+
+					<tr><td class="mono">MODKEY + C</td><td class="mono">t</td><td class="func">setlayout</td><td class="arg">layouts[0]</td></tr>
+					<tr><td class="mono">MODKEY + C</td><td class="mono">y</td><td class="func">setlayout</td><td class="arg">layouts[1]</td></tr>
+					<tr><td class="mono">MODKEY + C</td><td class="mono">u</td><td class="func">setlayout</td><td class="arg">layouts[2]</td></tr>
+
+					<tr><td class="mono">TAGKEYS</td><td class="mono">&amp; (ampersand)</td><td class="func">TAGKEYS macro</td><td class="arg">tag 0</td></tr>
+					<tr><td class="mono">TAGKEYS</td><td class="mono">é (eacute)</td><td class="func">TAGKEYS macro</td><td class="arg">tag 1</td></tr>
+					<tr><td class="mono">TAGKEYS</td><td class="mono">" (quotedbl)</td><td class="func">TAGKEYS macro</td><td class="arg">tag 2</td></tr>
+					<tr><td class="mono">TAGKEYS</td><td class="mono">' (apostrophe)</td><td class="func">TAGKEYS macro</td><td class="arg">tag 3</td></tr>
+					<tr><td class="mono">TAGKEYS</td><td class="mono">( (parenleft)</td><td class="func">TAGKEYS macro</td><td class="arg">tag 4</td></tr>
+					<tr><td class="mono">TAGKEYS</td><td class="mono">- (minus)</td><td class="func">TAGKEYS macro</td><td class="arg">tag 5</td></tr>
+					<tr><td class="mono">TAGKEYS</td><td class="mono">è (egrave)</td><td class="func">TAGKEYS macro</td><td class="arg">tag 6</td></tr>
+					<tr><td class="mono">TAGKEYS</td><td class="mono">_ (underscore)</td><td class="func">TAGKEYS macro</td><td class="arg">tag 7</td></tr>
+					<tr><td class="mono">TAGKEYS</td><td class="mono">ç (ccedilla)</td><td class="func">TAGKEYS macro</td><td class="arg">tag 8</td></tr>
+					<tr><td class="mono">TAGKEYS</td><td class="mono">à (agrave)</td><td class="func">TAGKEYS macro</td><td class="arg">tag 9</td></tr>
+				</tbody>
+			</table>
+
+			<footer>Tip: type to filter the table (try: <span class="pill">spawn</span>, <span class="pill">MODKEY</span>, <span class="pill">tag</span>).</footer>
+		</div>
+		<script src="dwm_keybindings.js"></script>
+	</body>
+</html>
