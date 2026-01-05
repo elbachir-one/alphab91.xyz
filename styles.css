@@ -9,17 +9,6 @@ body {
 	align-items: center;
 }
 
-h1 {
-	font-size: 2.9em;
-	background-color: #005577;
-	color: #ddd;
-	text-align: center;
-	padding: 20px;
-	margin-bottom: 40px;
-	margin-top: 80px;
-	border-radius: 10px;
-}
-
 .card-container {
 	display: flex;
 	flex-wrap: wrap;
@@ -52,6 +41,7 @@ h1 {
 
 .desc {
 	color: #ffffff;
+	margin-top: 80px;
 	margin-bottom: 50px;
 	padding: 20px;
 	border-top: 1px solid #30363d;
@@ -124,6 +114,13 @@ h1 {
 .bar-text {
 	font-size: 1.5em;
 	color: #e3f2fd;
+}
+
+.bar-title {
+	font-size: 2.0em;
+	background-color: #005577;
+	color: #ddd;
+	border-radius: 6px;
 }
 
 .bar-links {
