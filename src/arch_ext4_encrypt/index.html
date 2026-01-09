@@ -3,17 +3,18 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Arch Linux Installation for Beginners</title>
-		<link rel="stylesheet" href="arch_for_beginners.css">
+		<title>Installing Arch Linux on a USB with Ext4 + LUKS2)</title>
+		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
 		<header>
-			<h1 class="title">Arch Linux Installation for Beginners</h1>
-			<p class="subtitle">A concise, step‑by‑step guide.</p>
+			<h1 class="title">Installing Arch Linux on a USB Drive <span style="color:var(--accent)">·</span> Ext4 + LUKS2</h1>
+			<p class="subtitle">A concise, step‑by‑step guide to create a portable, encrypted Arch Linux on a USB drive.</p>
 			<div class="badge">
-				<span>Target: sdY/nvmeY drive</span>
+				<span>Target: USB drive</span>
 				<span>FS: Ext4</span>
-				<span>Boot: UEFI</span>
+				<span>Encryption: LUKS2</span>
+				<span>Boot: UEFI + BIOS</span>
 			</div>
 		</header>
 
@@ -24,18 +25,19 @@
 					<li><a href="#iso">Download & verify ISO</a></li>
 					<li><a href="#live-usb">Create installer USB</a></li>
 					<li><a href="#connect-wifi">Connect to the Internet</a></li>
-					<li><a href="#partition">Partition target Drive</a></li>
-					<li><a href="#fs">Create filesystems</a></li>
+					<li><a href="#partition">Partition target USB</a></li>
+					<li><a href="#fs">Create filesystems & LUKS</a></li>
 					<li><a href="#ext4">Mount the filesystem</a></li>
 					<li><a href="#install">Install base system</a></li>
 					<li><a href="#fstab">Generate fstab</a></li>
 					<li><a href="#config">System configuration</a></li>
-					<li><a href="#grub">GRUB Dual Boot (Optional)</a></li>
+					<li><a href="#grub">GRUB + encryption</a></li>
+					<li><a href="#initramfs">mkinitcpio</a></li>
 					<li><a href="#grub-install">Install GRUB</a></li>
 					<li><a href="#network">Networking</a></li>
 					<li><a href="#desktop">Desktop environment</a></li>
 					<li><a href="#finish">Finish</a></li>
-					<li><a href="#post">Post Installation</a></li>
+					<li><a href="#post">Post installation</a></li>
 				</ol>
 			</div>
 		</nav>
@@ -73,7 +75,7 @@
 
 			<section id="connect-wifi">
 				<h2>3 - Connect to the Internet</h2>
-				<p>Now plug in the USB installer</p>
+				<p>Now plug in both USBs — the media installer and the USB drive where we’ll install Arch Linux.</p>
 				<p class="warn">This next step is only necessary if you are using a <strong>Wi-Fi connection</strong>. If you are using <strong>Ethernet</strong>, you can skip it.</p>
 				<p>Let’s connect to the internet using <code>iwctl</code>:</p>
 				<ol>
@@ -97,7 +99,7 @@
 					<div class="codeblock">
 						<pre><code>iwctl station wlan0 connect SSID</code></pre>
 					</div>
-					<p>Replace <code>SSID</code> with your Wi-Fi network name, press <kbd>ENTER</kbd>, type your passphrase, and exit <strong>iwctl</strong> with <code>exit</code>.</p>
+					<p>Replace <code>SSID</code> with your Wi-Fi network name, press <kbd>ENTER</kbd>, and type your passphrase.</p>
 
 					<li>Test your connection:</li>
 					<div class="codeblock">
@@ -107,76 +109,63 @@
 			</section>
 
 			<section id="partition">
-				<h2>4 - Partition target Drive</h2>
-				<div class="ok">
-					<p><strong>Tip:</strong> To have the best partition layout, it’s recommended to create a separate <strong>home</strong> partition. This way, if you ever mess up the root partition, you can reinstall the system and mount the existing home partition without losing your personal data.</p>
-
-					<p>The general guideline is: the more disk space you have, the better it is to have a separate <strong>home</strong> partition. I recommend giving your <strong>root</strong> partition about <strong>25% of the total disk space</strong> and leaving the rest for the home partition. This will result in <strong>three partitions</strong>: <strong>EFI, ROOT, HOME</strong>.</p>
-
-					<h4>Example for a 512 GiB Drive</h4>
-					<ul>
-						<li>EFI partition: 2 GiB</li>
-						<li>Root partition: 128 GiB (25%)</li>
-						<li>Home partition: 382 GiB (remaining space)</li>
-					</ul>
-
-					<p>As for swap, it’s better to create a <strong>swap file</strong> instead of a dedicated swap partition. 
-					This makes resizing easier. The size of the swap file depends on your RAM and whether you want to enable hibernation. 
-					For instance, if you have <strong>16 GiB of RAM</strong>, a <strong>16 GiB swap file</strong> is a reasonable choice.</p>
-				</div>
-				<p>Create three partitions on the <em>target</em> Drive (512GiB):</p>
+				<h2>4 - Partition target USB</h2>
+				<p>Create three partitions on the <em>target</em> USB:</p>
 				<table>
 					<thead>
 						<tr><th>#</th><th>Purpose</th><th>Size</th><th>Type / FS</th><th>Mount</th></tr>
 					</thead>
 					<tbody>
-						<tr><td>1</td><td>UEFI system</td><td>2&nbsp;GiB</td><td>vfat (FAT32)</td><td>/boot</td></tr>
-						<tr><td>2</td><td>Root</td><td>128&nbsp;GiB (25%)</td><td>Ext4</td><td>/</td></tr>
-						<tr><td>3</td><td>Home</td><td>Rest</td><td>Ext4</td><td>/home</td></tr>
+						<tr><td>1</td><td>BIOS boot</td><td>128&nbsp;MiB</td><td>ext2</td><td>—</td></tr>
+						<tr><td>2</td><td>UEFI system</td><td>512&nbsp;MiB</td><td>vfat (FAT32)</td><td>/boot</td></tr>
+						<tr><td>3</td><td>Root</td><td>Rest</td><td>LUKS2 → Ext4</td><td>/</td></tr>
 					</tbody>
 				</table>
 				<div class="codeblock">
 					<pre><code>cfdisk /dev/sdY</code></pre>
 				</div>
-				<p class="ok">After opening the target drive with <strong>cfdisk</strong>, you need to create three partitions: an EFI partition and a root partition.</p>
 				<p class="red"><strong>Warning:</strong> Double‑check the target device (e.g. <code>/dev/sdY</code>) with <code>lsblk</code> to avoid wiping the wrong disk.</p>
 			</section>
 
 			<section id="fs">
-				<h2>5 - Create Filesystems</h2>
-				<p>Now that the partitions are ready, we need to format them with appropriate filesystems.</p>
+				<h2>5 - Create Filesystems & Setup LUKS Encryption</h2>
+				<p>Now that the partitions are ready, we need to format them with appropriate filesystems and optionally set up encryption for sensitive data.</p>
 
 				<div class="codeblock">
-					<pre><code>mkfs.vfat -F32 /dev/sdY1</code><p class="note">Formats the first partition as FAT32. This is typically used for EFI System Partitions.</p></pre>
+					<pre><code>mkfs.ext2 /dev/sdY1</code><p class="note">Formats the first partition (<code>/dev/sdY1</code>) with the EXT2 filesystem.</p></pre>
 
-					<pre><code>mkfs.ext4 /dev/sdY2</code>
-<p class="note">Formats the second partition with the Ext4 filesystem</p></pre>
+					<pre><code>mkfs.vfat -F32 /dev/sdY2</code><p class="note">Formats the second partition (<code>/dev/sdY2</code>) as FAT32. This is typically used for EFI System Partitions.</p></pre>
 
-					<pre><code>mkfs.ext4 /dev/sdY3</code>
-<p class="note">Formats the 3 partition with the Ext4 filesystem</p></pre>
+					<pre><code>cryptsetup luksFormat --type luks2 /dev/sdY3</code><p class="note">Initializes LUKS2 encryption on the third partition (<code>/dev/sdY3</code>).
+Type <kbd>YES</kbd> in uppercase to confirm, then type a strong passphrase.</p></pre>
 
+					<pre><code>cryptsetup luksOpen /dev/sdY3 cryptroot</code><p class="note">Opens the LUKS-encrypted partition and maps it to <code>/dev/mapper/cryptroot</code>.
+To interact with the partition as if it were unencrypted.</p></pre>
+
+					<p class="warn">USB drives have a limited number of write cycles.
+					In this case, a better solution is to create a file system without journaling, since a
+					journaling file system consumes additional writes as the journal is updated.
+					Eventually, we are also going to configure systemd-journald to store logs in RAM.
+					</p>
+					<pre><code>mkfs.ext4 -O "^has_journal" /dev/mapper/cryptroot</code>
+<p class="note">Formats the decrypted partition with the Ext4 filesystem while disabling
+the journaling feature using <code>-O "^has_journal"</code>.</p></pre>
 				</div>
 			</section>
 
 			<section id="ext4">
-				<h2>6 - Mount the Filesystem</h2>
-				<p>Next, we mount the root filesystem, the home partition, and the EFI partition.</p>
+				<h2>6 - Mount the filesystem</h2>
+				<p>Next, we mount the root filesystem and the EFI partition</p>
 
 				<div class="codeblock">
-					<pre><code>mount /dev/sdY2 /mnt</code>
-<p class="note">Mounts the second partition to <code>/mnt</code></p></pre>
+					<pre><code>mount /dev/mapper/cryptroot /mnt</code>
+<p class="note">Mounts the decrypted Ext4 partition to <code>/mnt</code></p></pre>
 
 					<pre><code>mkdir -vp /mnt/boot</code>
 <p class="note">Creates the <code>/boot</code> directory inside <code>/mnt</code> to mount the corresponding partition.</p></pre>
 
-					<pre><code>mount /dev/sdY1 /mnt/boot</code>
+					<pre><code>mount /dev/sdY2 /mnt/boot</code>
 <p class="note">Mounts the EFI system partition at <code>/mnt/boot</code>.</p></pre>
-
-					<pre><code>mkdir -vp /mnt/home</code>
-<p class="note">Creates the <code>/home</code> directory inside <code>/mnt</code> to mount the corresponding partition.</p></pre>
-
-					<pre><code>mount /dev/sdY3 /mnt/home</code>
-<p class="note">Mounts the Home partition at <code>/mnt/home</code>.</p></pre>
 
 					<pre><code>lsblk -pf /dev/sdY</code>
 <p class="note">Lists the partitions, filesystems, and mount points to verify everything is set up correctly.</p></pre>
@@ -186,23 +175,26 @@
 			<section id="install">
 				<h2>7 - Install Base System</h2>
 				<div class="codeblock">
-					<pre><code>pacstrap -K /mnt linux linux-firmware linux-headers base base-devel nano \
-		 networkmanager grub efibootmgr os-prober bash-completion iwd</code></pre>
-					<p class="note"><strong>Tip:</strong> You will need to add your CPU microcode package: for Intel, add <code>intel-ucode</code>; for AMD, add <code>amd-ucode</code>.</p>
+					<pre><code>pacstrap -K /mnt linux-lts linux-firmware linux-lts-headers base base-devel nano \
+		 networkmanager grub efibootmgr dosfstools os-prober mtools \
+		 bash-completion iwd usbutils intel-ucode amd-ucode</code></pre>
 					<hr>
 					<ul>
-						<li><strong>linux</strong> – The Linux kernel.</li>
+						<li><strong>linux-lts</strong> – Long-Term Support kernel, stable and maintained for longer periods.</li>
 						<li><strong>linux-firmware</strong> – Firmware files for various hardware devices.</li>
-						<li><strong>linux-headers</strong> – Kernel headers for building modules against the kernel.</li>
+						<li><strong>linux-lts-headers</strong> – Kernel headers for building modules against the LTS kernel.</li>
 						<li><strong>base</strong> – Essential packages for a minimal Arch Linux system.</li>
 						<li><strong>base-devel</strong> – Development tools for compiling software (make, gcc, etc.).</li>
 						<li><strong>nano</strong> – Simple terminal text editor.</li>
 						<li><strong>networkmanager</strong> – Network management daemon and CLI tools.</li>
 						<li><strong>grub</strong> – Bootloader to start the OS.</li>
 						<li><strong>efibootmgr</strong> – EFI boot manager to configure UEFI boot entries.</li>
+						<li><strong>dosfstools</strong> – Tools for creating and checking FAT filesystems.</li>
 						<li><strong>os-prober</strong> – Detects other OS installations for bootloader configuration.</li>
+						<li><strong>mtools</strong> – Utilities to access FAT filesystems without mounting them.</li>
 						<li><strong>bash-completion</strong> – Bash completions for core commands.</li>
 						<li><strong>iwd</strong> – Wireless daemon for managing Wi-Fi connections.</li>
+						<li><strong>usbutils</strong> – Utilities to list and query USB devices.</li>
 						<li><strong>intel-ucode</strong> – Microcode updates for Intel CPUs.</li>
 						<li><strong>amd-ucode</strong> – Microcode updates for AMD CPUs.</li>
 					</ul>
@@ -210,7 +202,7 @@
 			</section>
 
 			<section id="fstab">
-				<h2>8 - Generate the Fstab</h2>
+				<h2>8 - Generate fstab</h2>
 				<div class="codeblock">
 					<pre><code>genfstab -U /mnt &gt; /mnt/etc/fstab</code></pre>
 					<p class="note">Generates the <code>fstab</code> file using UUIDs (-U) for all mounted partitions under <code>/mnt</code>, and writes it to <code>/mnt/etc/fstab</code>. This file tells the system which partitions to mount at boot.</p>
@@ -237,26 +229,28 @@ You can then use its output in the next command.</p></pre>
 					<pre><code>hwclock --systohc</code>
 <p class="note">Writes the system time to the hardware clock so it stays accurate after reboots.</p></pre>
 
-					<pre><code>nano /etc/locale.gen</code>
-<p class="note">Uncomment the locale you want to use by removing the <strong>#</strong> and then save the file.</p></pre>
+					<pre><code>echo "en_US.UTF-8 UTF-8" | tee -a /etc/locale.gen</code>
+<p class="note">Enables the locale for system-wide use. Make sure to set your preferred language.</p></pre>
 
 					<pre><code>locale-gen</code>
 <p class="note">Generates the locale files specified in <code>/etc/locale.gen</code>.</p></pre>
 
 					<pre><code>echo "LANG=en_US.UTF-8" &gt; /etc/locale.conf</code>
-<p class="note">Change the <code>en_US.UTF-8</code> to the locale you uncommented in the <code>/etc/locale.gen</code> file.</p></pre>
+<p class="note">Sets the default system language environment variable.</p></pre>
 
 					<pre><code>echo "KEYMAP=us" &gt; /etc/vconsole.conf</code>
-<p class="note">Add your own keymap by changing <code>us</code> to your keyboard layout.</p></pre>
+<p class="note">Add your own keymap.</p></pre>
 
 					<pre><code>passwd</code>
 <p class="note">Prompts to set a strong password for the root account.</p></pre>
 
-					<pre><code>useradd -mG wheel &lt;yourUserName&gt;</code>
-<p class="note">Creates the user with a home directory and adds them to the <code>wheel</code> group for administrative privileges.
-Replace <code>&lt;yourUserName&gt;</code> with your own username.</p></pre>
+					<pre><code>auser=yourusername</code>
+<p class="note">Defines the username you will create.</p></pre>
 
-					<pre><code>passwd &lt;yourUserName&gt;</code>
+					<pre><code>useradd -mG wheel "$auser"</code>
+<p class="note">Creates the user with a home directory and adds them to the <code>wheel</code> group for administrative privileges.</p></pre>
+
+					<pre><code>passwd "$auser"</code>
 <p class="note">Sets the password for your new user account.</p></pre>
 
 					<pre><code>EDITOR=nano visudo</code>
@@ -266,40 +260,79 @@ Uncomment the line at the bottom of the file by removing the <strong>#</strong> 
 			</section>
 
 			<section id="grub">
-				<h2>10 - GRUB Dual Boot (Optional)</h2>
+				<h2>10 - GRUB + Encryption</h2>
 				<div class="codeblock">
 					<pre><code>nano /etc/default/grub</code>
 <p class="note">Open the GRUB configuration file for editing. This file controls bootloader settings and kernel parameters.</p></pre>
 
-					<pre><code>GRUB_DISABLE_OS_PROBER=false     # Uncomment the line by removing the hashtag (#), then save and exit the file</code>
-<p class="note">This enables GRUB to detect and recognize other operating systems.</p></pre>
+					<pre><code>GRUB_ENABLE_CRYPTODISK=y     # Uncomment the line by removing the hashtag (#), then save and exit the file</code>
+<p class="note">This enables GRUB to recognize LUKS-encrypted partitions at boot, allowing you to enter the passphrase early.</p></pre>
 
+					<pre><code>cryptsetup luksUUID /dev/sdY3</code>
+<p class="note">Outputs the unique identifier of your LUKS encrypted partition. It tells GRUB which partition to unlock.</p></pre>
 
-					<p class="red">Use this only if you have another OS and want to dual boot between Arch Linux and that OS.
-					You can skip this step if you don’t want to set up dual booting.</p></pre>
+					<pre><code>UUID=$(cryptsetup luksUUID /dev/sdY3)
+sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"cryptdevice=UUID=$UUID:root\"|" /etc/default/grub</code>
+<p class="note">This two-line command retrieves the LUKS UUID automatically and updates the GRUB configuration safely, avoiding
+manual copy/paste.</p></pre>
+				</div>
+<p class="warn"><strong>Warning:</strong> A single wrong character can make the system unbootable. Double‑check the UUID and syntax before updating GRUB.</p>
+			</section>
+
+			<section id="initramfs">
+				<h2>11 - mkinitcpio</h2>
+				<div class="codeblock">
+					<pre><code>nano /etc/mkinitcpio.conf</code>
+<p class="note">Open the configuration file where you define which modules and hooks are included in the initramfs.</p></pre>
+
+					<pre><code>MODULES=(usb_storage usbhid xhci_pci ehci_pci)</code>
+<p class="note">Here, USB storage, USB keyboard, and USB controllers are included for proper hardware initialization.</p></pre>
+
+					<pre><code>HOOKS=(base udev keyboard autodetect microcode modconf kms keymap consolefont block encrypt filesystems fsck)</code>
+<p class="note"><strong>HOOKS</strong> – Define the sequence of operations during boot. Important points:
+- <code>keyboard</code> before <code>autodetect</code> ensures the keyboard works for password entry.
+- <code>encrypt</code> before <code>filesystems</code> ensures encrypted volumes are unlocked before mounting.</p></pre>
+
+					<pre><code>mkinitcpio -P</code>
+<p class="note">Rebuilds all preset initramfs images using the updated configuration, so the system boots
+with proper modules and hooks.</p></pre>
+				</div>
 			</section>
 
 			<section id="grub-install">
-				<h2>11 - Install GRUB</h2>
+				<h2>12 - Install GRUB</h2>
 
 				<p><strong>UEFI</strong></p>
 				<div class="codeblock">
-					<pre><code>grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --recheck</code>
+					<pre><code>grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --removable --recheck</code>
 <p class="note">Installs GRUB for UEFI systems.
 - <code>--efi-directory=/boot</code> specifies the EFI system partition.
 - <code>--bootloader-id=GRUB</code> names the boot entry.
+- <code>--removable</code> makes it bootable on removable media.
 - <code>--recheck</code> ensures device detection is refreshed.</p></pre>
 				</div>
+
+				<p><strong>Legacy BIOS</strong></p>
+				<div class="codeblock">
+					<pre><code>grub-install --target=i386-pc --boot-directory=/boot /dev/sdY</code>
+<p class="note">Installs GRUB for BIOS systems.
+- <code>--boot-directory=/boot</code> specifies where GRUB files go.
+- Replace <code>/dev/sdY</code> with your actual target disk.</p></pre>
+				</div>
+
+				<p class="warn"><strong>Warning:</strong> Make sure to install for both <strong>UEFI</strong> and <strong>Legacy</strong> modes to ensure the USB boots on both.</p>
 
 				<p><strong>Generate GRUB configuration</strong></p>
 				<div class="codeblock">
 					<pre><code>grub-mkconfig -o /boot/grub/grub.cfg</code>
 <p class="note">Automatically generates the GRUB configuration file, detecting all kernels and operating systems.</p></pre>
 				</div>
+
+				<p class="red"><strong>Warning:</strong> Make sure to replace <code>sdY</code> with your actual device. Installing GRUB to the wrong device can prevent your system from booting.</p>
 			</section>
 
 			<section id="network">
-				<h2>12 - Networking, Hosts</h2>
+				<h2>13 - Networking, Hosts, and DNS</h2>
 				<div class="codeblock">
 					<pre><code>systemctl enable systemd-networkd</code>
 <p class="note">Enables the systemd network service at boot, which manages network interfaces automatically.</p></pre>
@@ -310,24 +343,25 @@ Uncomment the line at the bottom of the file by removing the <strong>#</strong> 
 					<pre><code>systemctl enable NetworkManager</code>
 <p class="note">A higher-level tool to manage wired, wireless, and VPN connections with CLI or GUI tools.</p></pre>
 
-					<pre><p>Edit the file <strong><code>/etc/hosts</code></strong> with <code>nano</code> and add the following lines</p>
-<code>127.0.0.1   localhost</code>
-<code>::1         localhost</code>
-<code>127.0.1.1   YourHostName.localdomain   YourHostName</code>
-
-<p class="note">Change <strong>YourHostName</strong> to your own host name.
-Maps hostnames to IP addresses locally.
+					<pre><code>host=$(cat /etc/hostname)
+sh -c "printf '127.0.0.1   localhost\n::1   localhost\n127.0.1.1   $host.localdomain   $host\n' > /etc/hosts"</code>
+<p class="note">Maps hostnames to IP addresses locally.
 This ensures your system can resolve its own hostname and loopback addresses without querying DNS.</p></pre>
+
+					<pre><code>sh -c 'printf "nameserver 8.8.8.8\nnameserver 1.1.1.1\n" >> /etc/resolv.conf'</code>
+<p class="note"><strong>/etc/resolv.conf</strong> – Adds public DNS servers (Google and Cloudflare) for name resolution.
+To ensures the system can resolve domain names on the internet.</p></pre>
 				</div>
 			</section>
 
 			<section id="desktop">
-				<h2>13 - Desktop Environment (optional)</h2>
+				<h2>14 - Desktop Environment (optional)</h2>
 				<div class="codeblock">
 					<pre><code>pacman -S xfce4 xfce4-goodies lightdm lightdm-gtk-greeter network-manager-applet \
 	  bluez bluez-utils wget curl git xdg-utils gvfs openssh alsa-utils \
 	  pipewire pipewire-pulse pavucontrol wireplumber unzip ntfs-3g rsync \
-	  noto-fonts-emoji noto-fonts-cjk noto-fonts-extra chromium reflector cups</code></pre>
+	  noto-fonts-emoji noto-fonts-cjk noto-fonts-extra chromium arch-install-scripts \
+	  gparted reflector cups</code></pre>
 					<ul>
 						<li><strong>xfce4</strong> – XFCE desktop environment.</li>
 						<li><strong>xfce4-goodies</strong> – Additional XFCE plugins and tools.</li>
@@ -372,10 +406,10 @@ This ensures your system can resolve its own hostname and loopback addresses wit
 			</section>
 
 			<section id="finish">
-				<h2>14 - Finish</h2>
+				<h2>15 - Finish</h2>
 				<div class="codeblock">
 					<pre><code>exit</code>
-<p class="note">Leaves the chroot environment, returning to the live installer system.</p></pre>
+<p class="note"><strong>exit</strong> – Leaves the chroot environment, returning to the live installer system.</p></pre>
 
 					<pre><code>umount -R /mnt</code>
 <p class="note">Recursively unmounts all partitions mounted under <code>/mnt</code>, ensuring no filesystems are left mounted before shutdown.</p></pre>
@@ -384,19 +418,37 @@ This ensures your system can resolve its own hostname and loopback addresses wit
 <p class="note">Shuts down the installer system safely. After this, you can remove the installation media and boot your new system.</p></pre>
 				</div>
 
-				<p class="warn"><strong>Warning:</strong> Remove the installer USB and boot your computer.</p>
 
-				<section id="post">
-					<h2>15 - Post Installation</h2>
+				<p class="warn"><strong>Warning:</strong> Remove the installer USB. Keep the target USB plugged in and boot from it. You should see the GRUB menu, then be prompted for your LUKS passphrase.</p>
+			</section>
 
-				<p class="warn">After booting and logging in as your user, the <strong>DNS</strong> step is important, while the <strong>YAY</strong> step is optional.</p>
-					<p class="ok">Let's set up the <strong>DNS</strong></p>
-					<pre><p>Edit the file <strong><code>/etc/resolv.conf</code></strong> with <code>nano</code> and add the following lines</p>
-<code>nameserver 8.8.8.8</code>
-<code>nameserver 1.1.1.1</code>
-<p class="note">Adds public DNS servers (Google and Cloudflare) for name resolution.
-To ensures the system can resolve domain names on the internet.</p></pre>
+			<section id="post">
+				<h2>16 - Post Installation</h2>
+				<div class="codeblock">
+					<p class="ok">After booting into the installed system, we need to perform some post-installation configuration.</p>
 
+					<p class="ok">After logging in and opening a terminal (if you are using a DE/WM), switch to the root user for the next steps:</p>
+					<pre><code>sudo su</code></pre>
+
+					<p class="ok">Enter your password and go to the home directory with.</p>
+					<pre><code>cd</code></pre>
+
+					<p class="ok">Next, configure the <code>systemd-journald</code> settings to store logs in RAM, reducing unnecessary writes to the USB stick.</p>
+					<pre><code>mkdir /etc/systemd/journald.conf.d</code></pre>
+
+					<p class="ok">Create the configuration file:</p>
+					<pre><code>nano /etc/systemd/journald.conf.d/usbstick.conf</code></pre>
+
+					<p class="ok">Add the following lines to the file:</p>
+					<pre>[Journal]
+Storage=volatile
+RuntimeMaxUse=30M</pre>
+
+					<p class="ok">Save the file and exit.</p>
+
+					<p class="ok">The next step is to install drivers. The Arch Wiki recommends using open-source drivers instead of proprietary ones:</p>
+					<p class="ok">Ensure you are connected to the internet. If using Wi-Fi, run <code>nmtui</code> to connect; if using Ethernet, you should be connected automatically.</p>
+					<pre><code>pacman -S xf86-video-vesa xf86-video-ati xf86-video-intel xf86-video-amdgpu xf86-video-nouveau</code></pre>
 					<p class="ok">Let's set up <strong>YAY</strong>, the AUR helper.</p>
 
 					<pre><code>cd /tmp/ && git clone https://aur.archlinux.org/yay</code>
@@ -405,11 +457,14 @@ To ensures the system can resolve domain names on the internet.</p></pre>
 					<pre><code>yay -Syu</code>
 <code>yay -S fastfetch</code>
 <code>fastfetch</code></pre>
-				</section>
 
-				<section>
-					<p class="ok"><strong>Et voilà!</strong> You now have installed Arch Linux.</p>
-				</section>
+					<p class="ok">After that, reboot, and that’s it—you can now use your USB stick on any computer.</p>
+				</div>
+			</section>
+
+			<section>
+				<p class="ok"><strong>Et voilà!</strong> You now have a portable, encrypted Arch Linux on USB.</p>
+			</section>
 
 		</main>
 	</body>
