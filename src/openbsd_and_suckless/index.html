@@ -43,28 +43,28 @@ git clone --depth=1 https://git.suckless.org/dmenu</pre>
 		<h3>dwm</h3>
 		<pre>cd dwm/
 vim config.mk</pre>
-		<img src="../images/openbsd_dwm.webp" alt="Uncomment dwm line">
+		<img src="openbsd_dwm.webp" alt="Uncomment dwm line">
 		<pre>make
 doas make install</pre>
 
 		<h3>st</h3>
 		<pre>cd st/
 vim config.mk</pre>
-		<img src="../images/openbsd_st.webp" alt="Uncomment st line">
+		<img src="openbsd_st.webp" alt="Uncomment st line">
 		<pre>make
 doas make install</pre>
 
 		<h3>dmenu</h3>
 		<pre>cd dmenu/
 vim config.mk</pre>
-		<img src="../images/openbsd_dmenu.webp" alt="Uncomment dmenu line">
+		<img src="openbsd_dmenu.webp" alt="Uncomment dmenu line">
 		<pre>make
 doas make install</pre>
 
 		<h2>Step 5: Create an .xsession File</h2>
 		<p>Create an <code>.xsession</code> file to use <code>xenodm</code> to launch <code>dwm</code>:</p>
 		<pre>vim .xsession</pre>
-		<img src="../images/openbsd_xsession.webp" alt="Creating .xsession file">
+		<img src="openbsd_xsession.webp" alt="Creating .xsession file">
 		<pre>exec dwm</pre>
 
 		<h2>Step 6: Enable xenodm</h2>
