@@ -113,7 +113,7 @@ body {
 
 .bar-text {
 	font-size: 1.5em;
-	color: #e3f2fd;
+	color: #005577;
 }
 
 .bar-title {
@@ -154,12 +154,9 @@ body {
 	color: #fff;
 }
 
-.bar-links a[href*="paypal"], .bar-links a[href*="donate"] i {
+.bar-links a[href*="paypal"] i,
+.bar-links a[href*="donate"] i {
 	color: #FFA500;
-}
-
-.bar-text {
-	color: #005577;
 }
 
 .search-container {
