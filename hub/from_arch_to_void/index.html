@@ -3,14 +3,15 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
-		<title>Switching from Arch Linux to Void Linux — Guide</title>
+		<title>Switching from Arch Linux to Void Linux</title>
 		<link rel="stylesheet" href="style.css" />
 	</head>
 	<body>
 		<div class="container">
 			<header>
 				<div class="title">
-					<h1>Switching from Arch Linux to Void Linux — Guide</h1>
+					<h1>Switching from Arch Linux to Void Linux</h1>
+					<br>
 					<div class="muted">Quick notes, command mappings, checklist and things to watch for when migrating.</div>
 				</div>
 			</header>
@@ -27,7 +28,7 @@
 						<ul>
 							<li><strong>Init system</strong>: Arch uses systemd; Void uses <strong>runit</strong> (service supervision).</li>
 							<li><strong>Package manager</strong>: pacman vs <strong>xbps</strong> (xbps-install, xbps-query, xbps-remove).</li>
-							<li><strong>Repositories</strong>: Void's repos are curated — <em>not</em> an AUR equivalent; community builds exist (e.g., xbps-src).</li>
+							<li><strong>Repositories</strong>: Void's repos are curated <em>not</em> an AUR equivalent; community builds exist (e.g., xbps-src).</li>
 							<li><strong>Musl vs glibc</strong>: Void supports musl and glibc images; Arch is glibc-only by default.</li>
 							<li><strong>Philosophy</strong>: Minimal base, BSD-style init scripts, less auto-magic; expect to configure things manually.</li>
 						</ul>
@@ -64,7 +65,7 @@
 							<li>Pick the right image: <strong>glbic</strong> if you need wide software compatibility, or <strong>musl</strong> if you want a lightweight musl-based system.</li>
 							<li>Read the Void handbook (installer is not identical to Arch's installers; it uses a simple guided script or manual steps).</li>
 							<li>If you rely on AUR packages, plan to use <code>xbps-src</code> or build locally. Some packages may not exist in Void repos.</li>
-							<li>Decide on network setup tools: NetworkManager, dhcpcd, wpa_supplicant are available — pick what fits your workflow.</li>
+							<li>Decide on network setup tools: NetworkManager, dhcpcd, wpa_supplicant are available pick what fits your workflow.</li>
 							<li>Swap systemd-only software? Search for systemd-free alternatives or consider running with the systemd compatibility layer where possible.</li>
 						</ol>
 					</section>
@@ -73,8 +74,8 @@
 						<h2>Common pitfalls</h2>
 						<ul>
 							<li><strong>Missing AUR packages:</strong> not everything on Arch's AUR exists on Void; expect to build or adapt.</li>
-							<li><strong>Systemd-only apps:</strong> some software expects systemd — research or accept trade-offs.</li>
-							<li><strong>Services layout:</strong> runit has a different mental model — enabling vs linking services is different than enabling a systemd unit.</li>
+							<li><strong>Systemd-only apps:</strong> some software expects systemd research or accept trade-offs.</li>
+							<li><strong>Services layout:</strong> runit has a different mental model enabling vs linking services is different than enabling a systemd unit.</li>
 							<li><strong>Rolling differences:</strong> Void is rolling but curated; packages may lag or be maintained differently than Arch's upstream-forward model.</li>
 						</ul>
 					</section>
@@ -92,7 +93,7 @@
 						<h2>Resources & further reading</h2>
 						<ul>
 							<li>Void Linux handbook and wiki (search official Void docs).</li>
-							<li>xbps-src manual — building packages from source.</li>
+							<li>xbps-src manual building packages from source.</li>
 							<li>runit basics and examples.</li>
 						</ul>
 					</section>
@@ -100,7 +101,7 @@
 			</div>
 
 			<footer style="margin-top:18px;text-align:center;color:var(--muted)">
-				<small>Et voilà! Welcome to the Void</small>
+				<small>Et voilà!</small>
 			</footer>
 		</div>
 
