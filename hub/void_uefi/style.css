@@ -84,22 +84,16 @@ section {
 	scroll-margin-top: 70px;
 }
 
-@media (max-width: 600px) {
+@media screen and (max-width: 768px) {
 
-	nav {
-		display: none;
-	}
-
-	.nav-toggle-label {
-		display: none;
-	}
-
+	nav,
+	.nav-toggle-label,
 	#nav-toggle {
-		display: none;
+		display: none !important;
 	}
 
 	main {
-		margin-left: 0;
+		margin-left: 0 !important;
 		padding: 16px;
 	}
 }
