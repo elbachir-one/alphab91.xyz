@@ -84,9 +84,7 @@ section {
 	scroll-margin-top: 70px;
 }
 
-.external {
-	color: #5500FF;
-}
+.external { color: blueviolet; }
 
 @media screen and (max-width: 768px) {
 
