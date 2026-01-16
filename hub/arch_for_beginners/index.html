@@ -5,6 +5,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>Arch Linux Installation for Beginners</title>
 		<link rel="stylesheet" href="style.css">
+		<link rel="icon" type="image/png" sizes="16x16" href="images/hub/arch_for_beginners/favicon-16x16.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="images/hub/arch_for_beginners/favicon-32x32.png">
 	</head>
 	<body>
 		<header>
@@ -287,10 +289,13 @@
 				<p><strong>UEFI</strong></p>
 				<div class="codeblock">
 					<pre><code>grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --recheck</code></pre>
-					<p class="note">Installs GRUB for UEFI systems.
-					- <code>--efi-directory=/boot</code> specifies the EFI system partition.
-					- <code>--bootloader-id=GRUB</code> names the boot entry.
-					- <code>--recheck</code> ensures device detection is refreshed.</p>
+					<p class="note"><code>--target=x86_64-efi</code> installs GRUB for UEFI systems.
+					<br>
+					<code>--efi-directory=/boot</code> specifies the EFI system partition.
+					<br>
+					<code>--bootloader-id=GRUB</code> names the boot entry.
+					<br>
+					<code>--recheck</code> ensures device detection is refreshed.</p>
 				</div>
 
 				<p><strong>Generate GRUB configuration</strong></p>
@@ -312,11 +317,10 @@
 					<pre><code>systemctl enable NetworkManager</code></pre>
 					<p class="note">A higher-level tool to manage wired, wireless, and VPN connections with CLI or GUI tools.</p>
 
-					<pre><p>Edit the file <strong><code>/etc/hosts</code></strong> with <code>nano</code> and add the following lines</p>
-<code>127.0.0.1   localhost</code>
-<code>::1         localhost</code>
-<code>127.0.1.1   YourHostName.localdomain   YourHostName</code></pre>
-
+					<p>Edit the file <strong><code>/etc/hosts</code></strong> with <code>nano</code> and add the following lines</p>
+					</pre><code>127.0.0.1   localhost</code>
+					<code>::1         localhost</code>
+					<code>127.0.1.1   YourHostName.localdomain   YourHostName</code></pre>
 					<p class="note">Change <strong>YourHostName</strong> to your own host name.
 					Maps hostnames to IP addresses locally.
 					This ensures your system can resolve its own hostname and loopback addresses without querying DNS.</p>
@@ -327,9 +331,9 @@
 				<h2>13 - Desktop Environment (optional)</h2>
 				<div class="codeblock">
 					<pre><code>pacman -S xfce4 xfce4-goodies lightdm lightdm-gtk-greeter network-manager-applet \
-	  bluez bluez-utils wget curl git xdg-utils gvfs openssh alsa-utils \
-	  pipewire pipewire-pulse pavucontrol wireplumber unzip ntfs-3g rsync \
-	  noto-fonts-emoji noto-fonts-cjk noto-fonts-extra chromium reflector cups</code></pre>
+	bluez bluez-utils wget curl git xdg-utils gvfs openssh alsa-utils \
+	pipewire pipewire-pulse pavucontrol wireplumber unzip ntfs-3g rsync \
+	noto-fonts-emoji noto-fonts-cjk noto-fonts-extra chromium reflector cups</code></pre>
 					<ul>
 						<li><strong>xfce4</strong> – XFCE desktop environment.</li>
 						<li><strong>xfce4-goodies</strong> – Additional XFCE plugins and tools.</li>
@@ -392,8 +396,8 @@
 
 					<p class="warn">After booting and logging in as your user, the <strong>DNS</strong> step is important, while the <strong>YAY</strong> step is optional.</p>
 					<p class="ok">Let's set up the <strong>DNS</strong></p>
-					<pre><p>Edit the file <strong><code>/etc/resolv.conf</code></strong> with <code>nano</code> and add the following lines</p>
-<code>nameserver 8.8.8.8</code>
+					<p>Edit the file <strong><code>/etc/resolv.conf</code></strong> with <code>nano</code> and add the following lines</p>
+<pre><code>nameserver 8.8.8.8</code>
 <code>nameserver 1.1.1.1</code></pre>
 					<p class="note">Adds public DNS servers (Google and Cloudflare) for name resolution.
 					To ensures the system can resolve domain names on the internet.</p>
