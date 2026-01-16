@@ -148,7 +148,8 @@
 				<p>Now that the partitions are ready, we need to format them with appropriate filesystems.</p>
 
 				<div class="codeblock">
-					<pre><code>mkfs.vfat -F32 /dev/sdY1</code><p class="note">Formats the first partition as FAT32. This is typically used for EFI System Partitions.</p></pre>
+					<pre><code>mkfs.vfat -F32 /dev/sdY1</code></pre>
+					<p class="note">Formats the first partition as FAT32. This is typically used for EFI System Partitions.</p>
 
 					<pre><code>mkfs.ext4 /dev/sdY2</code>
 <p class="note">Formats the second partition with the Ext4 filesystem</p></pre>
