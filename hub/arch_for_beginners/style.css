@@ -129,17 +129,6 @@ ul, ol {
 	margin: 8px 0 8px 22px;
 }
 
-.grid {
-	display: grid;
-	gap: 18px;
-}
-
-@media (min-width:860px) {
-	.grid.cols-2 {
-		grid-template-columns: 1fr 1fr;
-	}
-}
-
 .note, .warn, .red, .ok {
 	border-left: 4px solid var(--accent-3);
 	padding: 10px 12px;
