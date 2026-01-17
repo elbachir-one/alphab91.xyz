@@ -9,8 +9,8 @@ body {
 
 .container {
 	max-width: 1300px;
-	margin: 30px auto;
-	padding: 30px;
+	margin: 10px auto;
+	padding: 10px;
 	border-radius: 10px;
 	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
 	border: 2px solid #a30400;
@@ -75,4 +75,48 @@ a {
 
 a:hover {
 	text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+	body {
+		padding: 1rem;
+		font-size: 15px;
+	}
+
+	.container {
+		padding: 1rem;
+		margin: 0 auto;
+		border-width: 1px;
+	}
+
+	h1 {
+		font-size: 1.6rem;
+	}
+
+	h2 {
+		font-size: 1.25rem;
+		margin-top: 1.5rem;
+	}
+
+	pre {
+		padding: 0.75rem;
+		font-size: 0.85rem;
+	}
+
+	code {
+		font-size: 0.85rem;
+	}
+
+	blockquote {
+		padding: 0.75rem;
+		margin: 0.75rem 0;
+	}
+
+	ul {
+		margin-left: 1.2rem;
+	}
+
+	hr {
+		margin: 1.5rem 0;
+	}
 }
