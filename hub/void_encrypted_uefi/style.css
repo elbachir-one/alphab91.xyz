@@ -137,7 +137,8 @@ section {
 	}
 
 	nav {
-		display: none;
+		display: none !important;
+		transform: none !important;
 	}
 
 	main {
@@ -146,6 +147,10 @@ section {
 	}
 
 	.nav-toggle-label {
+		display: none !important;
+	}
+
+	#nav-toggle {
 		display: none;
 	}
 }
