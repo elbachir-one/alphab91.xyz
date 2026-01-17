@@ -131,16 +131,21 @@ section {
 	transform: translateX(0);
 }
 
-@media screen and (max-width: 768px) {
+@media (max-width: 768px) {
+	body {
+		flex-direction: column;
+	}
 
-	nav,
-	.nav-toggle-label,
-	#nav-toggle {
-		display: none !important;
+	nav {
+		display: none;
 	}
 
 	main {
-		margin-left: 0 !important;
-		padding: 16px;
+		margin-left: 0;
+		padding: 20px;
+	}
+
+	.nav-toggle-label {
+		display: none;
 	}
 }
