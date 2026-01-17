@@ -1,54 +1,57 @@
 body {
 	font-family: Arial, sans-serif;
-	background-color: #aecedb;
-	color: #000;
-	line-height: 1.6;
-	padding: 20px;
+	background-color: #0f172a;
+	color: #e5e7eb;
+	line-height: 1.7;
+	padding: 1.25rem;
 	font-size: 18px;
+	box-sizing: border-box;
 }
 
-h1, h2, h3 {
-	color: #0055ff;
+h1, h2, h3, h4 {
+	color: #38bdf8;
+	margin-top: 1.2rem;
+	margin-bottom: 0.75rem;
 }
 
 h1 {
-	font-size: 2.5em;
-	margin-bottom: 20px;
+	font-size: 2.6em;
+	text-align: center;
 }
 
 h2 {
 	font-size: 2em;
-	margin-top: 30px;
 }
 
 h3 {
-	font-size: 1.75em;
-	margin-top: 20px;
+	font-size: 1.6em;
 }
 
 p, li {
-	margin: 10px 0;
+	margin: 0.6rem 0;
+	color: #e5e7eb;
 }
 
 pre {
-	background-color: #000;
-	color: #fff;
-	padding: 10px;
-	border-radius: 5px;
+	background-color: #020617;
+	color: #e2e8f0;
+	padding: 0.9rem;
+	border-radius: 8px;
 	overflow-x: auto;
-	font-size: 16px;
+	font-size: 1rem;
+	border: 1px solid #1e293b;
 }
 
 code {
-	background-color: #f4f4f9;
-	padding: 5px;
-	border-radius: 3px;
-	color: #d63384;
-	font-size: 16px;
+	background-color: #020617;
+	padding: 0.25rem 0.45rem;
+	border-radius: 4px;
+	color: #f472b6;
+	font-size: 1rem;
 }
 
 a {
-	color: #3498db;
+	color: #22d3ee;
 	text-decoration: none;
 }
 
@@ -57,35 +60,37 @@ a:hover {
 }
 
 .note, .highlight {
-	font-size: 18px;
+	font-size: 1rem;
+	margin: 1.2rem 0;
+	padding: 0.9rem;
+	border-left-width: 4px;
+	border-radius: 6px;
 }
 
 .note {
-	background-color: #ffeeba;
-	padding: 10px;
-	border-left: 5px solid #ffc107;
-	margin: 20px 0;
+	background-color: #1e293b;
+	border-left-color: #facc15;
+	color: #fef9c3;
 }
 
 .highlight {
-	background-color: #d4edda;
-	padding: 10px;
-	border-left: 5px solid #28a745;
-	margin: 20px 0;
+	background-color: #052e16;
+	border-left-color: #4ade80;
+	color: #dcfce7;
 }
 
 .code-section {
-	margin: 20px 0;
+	margin: 1.25rem 0;
 }
 
 ul {
-	padding-left: 20px;
-	font-size: 18px;
+	padding-left: 1.4rem;
+	font-size: 1rem;
 }
 
 @media (max-width: 768px) {
 	body {
-		padding: 10px;
+		padding: 0.75rem;
 		font-size: 16px;
 	}
 
@@ -102,10 +107,21 @@ ul {
 	}
 
 	pre {
-		font-size: 14px;
+		font-size: 0.9rem;
+		padding: 0.65rem;
 	}
 
 	code {
-		font-size: 14px;
+		font-size: 0.9rem;
+	}
+
+	.note, .highlight {
+		font-size: 0.9rem;
+		padding: 0.65rem;
+	}
+
+	ul {
+		font-size: 0.9rem;
+		padding-left: 1.1rem;
 	}
 }

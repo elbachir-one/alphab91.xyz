@@ -10,7 +10,7 @@
 
 		<h1>Void Linux Package Installation from Source</h1>
 
-		<h2>Installing, Configuring, and Patching Suckless Tools via xbps-src</h2>
+		<h4>Installing, Configuring, and Patching Suckless Tools via xbps-src</h4>
 
 		<h3>Configuring</h3>
 		<ol>
@@ -24,9 +24,9 @@
 			<li>Clone the Void Linux packages repository:</li>
 		</ol>
 		<div class="code-section">
-			<pre><code>git clone --depth=1 https://github.com/void-linux/void-packages.git
-cd void-packages/
-./xbps-src binary-bootstrap</code></pre>
+			<pre><code>git clone --depth=1 https://github.com/void-linux/void-packages.git</code>
+<code>cd void-packages/</code>
+<code>./xbps-src binary-bootstrap</code></pre>
 		</div>
 
 		<ol start="3">
@@ -41,16 +41,16 @@ ls masterdir/builddir/dwm{version}/</code></pre>
 			<li>Create a <code>files</code> directory inside the <code>dwm</code> source package for your configuration:</li>
 		</ol>
 		<div class="code-section">
-			<pre><code>mkdir -p srcpkgs/dwm/files
-cp masterdir/builddir/dwm{version}/config.def.h srcpkgs/dwm/files/config.h</code></pre>
+			<pre><code>mkdir -p srcpkgs/dwm/files</code>
+<code>cp masterdir/builddir/dwm{version}/config.def.h srcpkgs/dwm/files/config.h</code></pre>
 		</div>
 
 		<ol start="5">
 			<li>After modifying <code>config.h</code> for <code>dwm</code>, build and install the package:</li>
 		</ol>
 		<div class="code-section">
-			<pre><code>./xbps-src pkg dwm
-sudo xbps-install -R hostdir/binpkgs dwm</code></pre>
+			<pre><code>./xbps-src pkg dwm</code>
+<code>sudo xbps-install -R hostdir/binpkgs dwm</code></pre>
 		</div>
 
 		<h3>Patching</h3>
@@ -70,19 +70,19 @@ sudo xbps-install -R hostdir/binpkgs dwm</code></pre>
 			<li>Apply the patch, build, and install <code>st</code>:</li>
 		</ol>
 		<div class="code-section">
-			<pre><code>./xbps-src extract st
-cp masterdir/builddir/st{version}/config.def.h srcpkgs/st/files/config.h
-./xbps-src -f pkg st
-sudo xbps-install -R hostdir/binpkgs -f st</code></pre>
+			<pre><code>./xbps-src extract st</code>
+<code>cp masterdir/builddir/st{version}/config.def.h srcpkgs/st/files/config.h</code>
+<code>./xbps-src -f pkg st</code>
+<code>sudo xbps-install -R hostdir/binpkgs -f st</code></pre>
 		</div>
 
 		<div class="highlight">
 			<strong>Note</strong>: The same steps apply for other Suckless tools.
 		</div>
 
-		<h2>Finish</h2>
+		<h3>Finish</h3>
 
-		<hr>
+		<br>
 
 		<p><strong>***Et voilà***</strong></p>
 
