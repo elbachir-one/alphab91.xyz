@@ -6,6 +6,7 @@ body {
 	margin: 0;
 	padding: 0 1rem;
 	box-sizing: border-box;
+	font-size: 18px;
 }
 
 .container {
@@ -33,13 +34,13 @@ pre {
 	padding: 1rem;
 	border-radius: 8px;
 	overflow-x: auto;
-	font-size: 0.9rem;
+	font-size: 1rem;
 }
 
 code {
 	font-family: "Fira Code", monospace;
 	color: #8ec;
-	font-size: 0.9rem;
+	font-size: 1rem;
 }
 
 section {
@@ -60,31 +61,35 @@ a:hover {
 }
 
 @media (max-width: 600px) {
+	body {
+		font-size: 16px;
+	}
+
 	.container {
 		padding: 1rem;
 		margin: 1rem auto;
 	}
 
 	h1 {
-		font-size: 1.5rem;
+		font-size: 1.75rem;
 		margin-bottom: 2rem;
 	}
 
 	h2 {
-		font-size: 1.2rem;
+		font-size: 1.3rem;
 	}
 
 	h3 {
-		font-size: 1rem;
+		font-size: 1.1rem;
 	}
 
 	pre {
-		font-size: 0.8rem;
+		font-size: 0.9rem;
 		padding: 0.75rem;
 	}
 
 	code {
-		font-size: 0.8rem;
+		font-size: 0.9rem;
 	}
 
 	section {
