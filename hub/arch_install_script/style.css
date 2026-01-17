@@ -16,12 +16,6 @@ h1, h2 {
 	text-align: center;
 }
 
-.desc {
-	text-align: center;
-	margin-bottom: 1rem;
-	color: #83a598;
-}
-
 h2 {
 	font-size: 1.5rem;
 	margin-top: 1.5rem;
@@ -70,6 +64,12 @@ code {
 
 .code-section {
 	margin: 1rem 0;
+}
+
+.desc {
+	text-align: center;
+	margin-bottom: 1rem;
+	color: #83a598;
 }
 
 @media (max-width: 600px) {
