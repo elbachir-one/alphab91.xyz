@@ -97,7 +97,7 @@ header {
 	background: var(--panel);
 	border: 1px solid var(--border);
 	padding: 6px 10px;
-	border-radius: 999px;
+	border-radius: 9px;
 }
 
 main {
