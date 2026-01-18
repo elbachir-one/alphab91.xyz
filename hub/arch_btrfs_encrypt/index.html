@@ -66,6 +66,7 @@
 						<p class="warn">Replace <code>/dev/sdX</code> with your installer USB device.</p>
 						<p class="red"><strong>Warning:</strong> Make sure that your USB drives do not contain any important data.</p>
 					</div>
+					<br>
 					<div class="card">
 						<p><strong>Windows</strong></p>
 						<p>Use <a href="https://rufus.ie">Rufus</a> to write the ISO to your USB drive.</p>
@@ -132,17 +133,22 @@
 				<p>Now that the partitions are ready, we need to format them with appropriate filesystems and optionally set up encryption for sensitive data.</p>
 
 				<div class="codeblock">
-					<pre><code>mkfs.ext2 /dev/sdY1</code><p class="note">Formats the first partition (<code>/dev/sdY1</code>) with the EXT2 filesystem.</p></pre>
+					<pre><code>mkfs.ext2 /dev/sdY1</code></pre>
+					<p class="note">Formats the first partition (<code>/dev/sdY1</code>) with the EXT2 filesystem.</p>
 
-					<pre><code>mkfs.vfat -F32 /dev/sdY2</code><p class="note">Formats the second partition (<code>/dev/sdY2</code>) as FAT32. This is typically used for EFI System Partitions.</p></pre>
+					<pre><code>mkfs.vfat -F32 /dev/sdY2</code></pre>
+					<p class="note">Formats the second partition (<code>/dev/sdY2</code>) as FAT32. This is typically used for EFI System Partitions.</p>
 
-					<pre><code>cryptsetup luksFormat --type luks2 /dev/sdY3</code><p class="note">Initializes LUKS2 encryption on the third partition (<code>/dev/sdY3</code>).
-Type <kbd>YES</kbd> in uppercase to confirm, then type a strong passphrase.</p></pre>
+					<pre><code>cryptsetup luksFormat --type luks2 /dev/sdY3</code></pre>
+					<p class="note">Initializes LUKS2 encryption on the third partition (<code>/dev/sdY3</code>).
+Type <kbd>YES</kbd> in uppercase to confirm, then type a strong passphrase.</p>
 
-					<pre><code>cryptsetup luksOpen /dev/sdY3 cryptroot</code><p class="note">Opens the LUKS-encrypted partition and maps it to <code>/dev/mapper/cryptroot</code>.
-To interact with the partition as if it were unencrypted.</p></pre>
+					<pre><code>cryptsetup luksOpen /dev/sdY3 cryptroot</code></pre>
+					<p class="note">Opens the LUKS-encrypted partition and maps it to <code>/dev/mapper/cryptroot</code>.
+To interact with the partition as if it were unencrypted.</p>
 
-					<pre><code>mkfs.btrfs /dev/mapper/cryptroot</code><p class="note">Formats the decrypted partition with the Btrfs filesystem.</p></pre>
+					<pre><code>mkfs.btrfs /dev/mapper/cryptroot</code></pre>
+					<p class="note">Formats the decrypted partition with the Btrfs filesystem.</p>
 				</div>
 			</section>
 
@@ -151,33 +157,33 @@ To interact with the partition as if it were unencrypted.</p></pre>
 				<p>Next, we set up Btrfs subvolumes to separate the root filesystem and user data and mount the filesystem.</p>
 
 				<div class="codeblock">
-					<pre><code>mount /dev/mapper/cryptroot /mnt</code>
-<p class="note">Mounts the decrypted Btrfs partition to <code>/mnt</code> temporarily so we can create subvolumes.</p></pre>
+					<pre><code>mount /dev/mapper/cryptroot /mnt</code></pre>
+<p class="note">Mounts the decrypted Btrfs partition to <code>/mnt</code> temporarily so we can create subvolumes.</p>
 
-					<pre><code>btrfs subvolume create /mnt/@</code>
-<p class="note">Creates the root subvolume <code>@</code>. This will hold the main system files.</p></pre>
+					<pre><code>btrfs subvolume create /mnt/@</code></pre>
+<p class="note">Creates the root subvolume <code>@</code>. This will hold the main system files.</p>
 
-					<pre><code>btrfs subvolume create /mnt/@home</code>
-<p class="note">Creates the home subvolume <code>@home</code> for user data. Keeping it separate makes snapshots safer and easier.</p></pre>
+					<pre><code>btrfs subvolume create /mnt/@home</code></pre>
+<p class="note">Creates the home subvolume <code>@home</code> for user data. Keeping it separate makes snapshots safer and easier.</p>
 
-					<pre><code>umount /mnt</code>
-<p class="note">Unmounts the partition to remount it with the subvolumes as the active filesystem roots.</p></pre>
+					<pre><code>umount /mnt</code></pre>
+<p class="note">Unmounts the partition to remount it with the subvolumes as the active filesystem roots.</p>
 
-					<pre><code>mount -o relatime,compress=zstd:3,subvol=@ /dev/mapper/cryptroot /mnt</code>
+					<pre><code>mount -o relatime,compress=zstd:3,subvol=@ /dev/mapper/cryptroot /mnt</code></pre>
 <p class="note">Remounts the root subvolume <code>@</code> with options:
-<code>relatime</code> for efficient access times and <code>compress=zstd:3</code> for transparent compression.</p></pre>
+<code>relatime</code> for efficient access times and <code>compress=zstd:3</code> for transparent compression.</p>
 
-					<pre><code>mkdir -vp /mnt/{boot,home}</code>
-<p class="note">Creates the <code>/boot</code> and <code>/home</code> directories inside <code>/mnt</code> to mount the corresponding partitions or subvolumes.</p></pre>
+					<pre><code>mkdir -vp /mnt/{boot,home}</code></pre>
+<p class="note">Creates the <code>/boot</code> and <code>/home</code> directories inside <code>/mnt</code> to mount the corresponding partitions or subvolumes.</p>
 
-					<pre><code>mount -o relatime,compress=zstd:3,subvol=@home /dev/mapper/cryptroot /mnt/home</code>
-<p class="note">Mounts the <code>@home</code> subvolume at <code>/mnt/home</code> with the same options as the root subvolume.</p></pre>
+					<pre><code>mount -o relatime,compress=zstd:3,subvol=@home /dev/mapper/cryptroot /mnt/home</code></pre>
+<p class="note">Mounts the <code>@home</code> subvolume at <code>/mnt/home</code> with the same options as the root subvolume.</p>
 
-					<pre><code>mount /dev/sdY2 /mnt/boot</code>
-<p class="note">Mounts the EFI system partition at <code>/mnt/boot</code>.</p></pre>
+					<pre><code>mount /dev/sdY2 /mnt/boot</code></pre>
+<p class="note">Mounts the EFI system partition at <code>/mnt/boot</code>.</p>
 
-					<pre><code>lsblk -pf /dev/sdY</code>
-<p class="note">Lists the partitions, filesystems, and mount points to verify everything is set up correctly.</p></pre>
+					<pre><code>lsblk -pf /dev/sdY</code></pre>
+<p class="note">Lists the partitions, filesystems, and mount points to verify everything is set up correctly.</p>
 				</div>
 			</section>
 
@@ -222,66 +228,66 @@ To interact with the partition as if it were unencrypted.</p></pre>
 			<section id="config">
 				<h2>9 - System Configuration</h2>
 				<div class="codeblock">
-					<pre><code>arch-chroot /mnt</code>
+					<pre><code>arch-chroot /mnt</code></pre>
 <p class="note">Enters the new system environment at <code>/mnt</code>, so all following commands affect the installed system,
-not the live USB.</p></pre>
+not the live USB.</p>
 
-					<pre><code>echo "zombie" &gt; /etc/hostname</code>
-<p class="note">Sets the system name to <code>zombie</code>, Change it to your own hostname, which identifies your computer on networks.</p></pre>
+					<pre><code>echo "zombie" &gt; /etc/hostname</code></pre>
+<p class="note">Sets the system name to <code>zombie</code>, Change it to your own hostname, which identifies your computer on networks.</p>
 
-					<pre><code>ln -sf /usr/share/zoneinfo/Japan/Tokyo /etc/localtime</code>
-<p class="note">Links your local timezone file to <code>/etc/localtime</code> for correct system time. Set it to your own localtime</p></pre>
+					<pre><code>ln -sf /usr/share/zoneinfo/Japan/Tokyo /etc/localtime</code></pre>
+<p class="note">Links your local timezone file to <code>/etc/localtime</code> for correct system time. Set it to your own localtime</p>
 
-					<pre><code>hwclock --systohc</code>
-<p class="note"><strong>hwclock</strong> – Writes the system time to the hardware clock so it stays accurate after reboots.</p></pre>
+					<pre><code>hwclock --systohc</code></pre>
+<p class="note"><strong>hwclock</strong> – Writes the system time to the hardware clock so it stays accurate after reboots.</p>
 
-					<pre><code>echo "en_US.UTF-8 UTF-8" | tee -a /etc/locale.gen</code>
-<p class="note">Enables the <code>en_US.UTF-8</code> locale for system-wide use.</p></pre>
+					<pre><code>echo "en_US.UTF-8 UTF-8" | tee -a /etc/locale.gen</code></pre>
+<p class="note">Enables the <code>en_US.UTF-8</code> locale for system-wide use.</p>
 
-					<pre><code>locale-gen</code>
-<p class="note"><strong>locale-gen</strong> – Generates the locale files specified in <code>/etc/locale.gen</code>.</p></pre>
+					<pre><code>locale-gen</code></pre>
+<p class="note"><strong>locale-gen</strong> – Generates the locale files specified in <code>/etc/locale.gen</code>.</p>
 
-					<pre><code>echo "LANG=en_US.UTF-8" &gt; /etc/locale.conf</code>
-<p class="note">Sets the default system language environment variable.</p></pre>
+					<pre><code>echo "LANG=en_US.UTF-8" &gt; /etc/locale.conf</code></pre>
+<p class="note">Sets the default system language environment variable.</p>
 
-					<pre><code>echo "KEYMAP=us" &gt; /etc/vconsole.conf</code>
-<p class="note">Add your own keymap.</p></pre>
+					<pre><code>echo "KEYMAP=us" &gt; /etc/vconsole.conf</code></pre>
+<p class="note">Add your own keymap.</p>
 
-					<pre><code>passwd</code>
-<p class="note">Prompts to set a strong password for the root account.</p></pre>
+					<pre><code>passwd</code></pre>
+<p class="note">Prompts to set a strong password for the root account.</p>
 
-					<pre><code>auser=yourusername</code>
-<p class="note">Defines the username you will create.</p></pre>
+					<pre><code>auser=yourusername</code></pre>
+<p class="note">Defines the username you will create.</p>
 
-					<pre><code>useradd -mG wheel "$auser"</code>
-<p class="note">Creates the user with a home directory and adds them to the <code>wheel</code> group for administrative privileges.</p></pre>
+					<pre><code>useradd -mG wheel "$auser"</code></pre>
+<p class="note">Creates the user with a home directory and adds them to the <code>wheel</code> group for administrative privileges.</p>
 
-					<pre><code>passwd "$auser"</code>
-<p class="note">Sets the password for your new user account.</p></pre>
+					<pre><code>passwd "$auser"</code></pre>
+<p class="note">Sets the password for your new user account.</p>
 
-					<pre><code>EDITOR=nano visudo</code>
+					<pre><code>EDITOR=nano visudo</code></pre>
 <p class="note">Edits the <code>sudoers</code> file safely. This allows users in the <code>wheel</code> group to use <code>sudo</code> for administrative tasks.
-Uncomment the line at the bottom of the file by removing the <strong>#</strong> from: <strong>%wheel ALL=(ALL) ALL</strong></p></pre>
+Uncomment the line at the bottom of the file by removing the <strong>#</strong> from: <strong>%wheel ALL=(ALL) ALL</strong></p>
 				</div>
 			</section>
 
 			<section id="grub">
 				<h2>10 - GRUB + Encryption</h2>
 				<div class="codeblock">
-					<pre><code>nano /etc/default/grub</code>
-<p class="note"><strong>nano</strong> – Opens the GRUB configuration file for editing. This file controls bootloader settings and kernel parameters.</p></pre>
+					<pre><code>nano /etc/default/grub</code></pre>
+<p class="note"><strong>nano</strong> – Opens the GRUB configuration file for editing. This file controls bootloader settings and kernel parameters.</p>
 
-					<pre><code>GRUB_ENABLE_CRYPTODISK=y     # Uncomment the line by removing the hashtag (#), then save and exit the file</code>
-<p class="note">This enables GRUB to recognize LUKS-encrypted partitions at boot, allowing you to enter the passphrase early.</p></pre>
+					<pre><code>GRUB_ENABLE_CRYPTODISK=y     # Uncomment the line by removing the hashtag (#), then save and exit the file</code></pre>
+<p class="note">This enables GRUB to recognize LUKS-encrypted partitions at boot, allowing you to enter the passphrase early.</p>
 
-					<pre><code>cryptsetup luksUUID /dev/sdY3</code>
-<p class="note">Outputs the unique identifier of your LUKS encrypted partition. It tells GRUB which partition to unlock.</p></pre>
+					<pre><code>cryptsetup luksUUID /dev/sdY3</code></pre>
+<p class="note">Outputs the unique identifier of your LUKS encrypted partition. It tells GRUB which partition to unlock.</p>
 
 					<pre><code>UUID=$(cryptsetup luksUUID /dev/sdY3)
 sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"cryptdevice=UUID=$UUID:root rootfstype=btrfs\"|" /etc/default/grub
-</code>
+</code></pre>
 <p class="note">This two-line command retrieves the LUKS UUID automatically and updates the GRUB configuration safely, avoiding
-manual copy/paste.</p></pre>
+manual copy/paste.</p>
 				</div>
 				<p class="warn"><strong>Warning:</strong> A single wrong character can make the system unbootable. Double‑check the UUID and syntax before updating GRUB.</p>
 			</section>
@@ -289,20 +295,20 @@ manual copy/paste.</p></pre>
 			<section id="initramfs">
 				<h2>11 - mkinitcpio</h2>
 				<div class="codeblock">
-					<pre><code>nano /etc/mkinitcpio.conf</code>
-<p class="note"><strong>nano</strong> – Opens the configuration file where you define which modules and hooks are included in the initramfs.</p></pre>
+					<pre><code>nano /etc/mkinitcpio.conf</code></pre>
+<p class="note"><strong>nano</strong> – Opens the configuration file where you define which modules and hooks are included in the initramfs.</p>
 
-					<pre><code>MODULES=(btrfs usb_storage usbhid xhci_pci ehci_pci)</code>
-<p class="note">Here, Btrfs support, USB storage, USB keyboard, and USB controllers are included for proper hardware initialization.</p></pre>
+					<pre><code>MODULES=(btrfs usb_storage usbhid xhci_pci ehci_pci)</code></pre>
+<p class="note">Here, Btrfs support, USB storage, USB keyboard, and USB controllers are included for proper hardware initialization.</p>
 
-					<pre><code>HOOKS=(base udev keyboard autodetect microcode modconf kms keymap consolefont block encrypt filesystems fsck)</code>
+					<pre><code>HOOKS=(base udev keyboard autodetect microcode modconf kms keymap consolefont block encrypt filesystems fsck)</code></pre>
 <p class="note"><strong>HOOKS</strong> – Define the sequence of operations during boot. Important points:
 - <code>keyboard</code> before <code>autodetect</code> ensures the keyboard works for password entry.
-- <code>encrypt</code> before <code>filesystems</code> ensures encrypted volumes are unlocked before mounting.</p></pre>
+- <code>encrypt</code> before <code>filesystems</code> ensures encrypted volumes are unlocked before mounting.</p>
 
-					<pre><code>mkinitcpio -P</code>
+					<pre><code>mkinitcpio -P</code></pre>
 <p class="note">Rebuilds all preset initramfs images using the updated configuration, so the system boots
-with proper modules and hooks.</p></pre>
+with proper modules and hooks.</p>
 				</div>
 			</section>
 
@@ -311,28 +317,28 @@ with proper modules and hooks.</p></pre>
 
 				<p><strong>UEFI</strong></p>
 				<div class="codeblock">
-					<pre><code>grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --removable --recheck</code>
+					<pre><code>grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --removable --recheck</code></pre>
 <p class="note"><strong>grub-install</strong> – Installs GRUB for UEFI systems.
 - <code>--efi-directory=/boot</code> specifies the EFI system partition.
 - <code>--bootloader-id=GRUB</code> names the boot entry.
 - <code>--removable</code> makes it bootable on removable media.
-- <code>--recheck</code> ensures device detection is refreshed.</p></pre>
+- <code>--recheck</code> ensures device detection is refreshed.</p>
 				</div>
 
 				<p><strong>Legacy BIOS</strong></p>
 				<div class="codeblock">
-					<pre><code>grub-install --target=i386-pc --boot-directory=/boot /dev/sdY</code>
+					<pre><code>grub-install --target=i386-pc --boot-directory=/boot /dev/sdY</code></pre>
 <p class="note"><strong>grub-install</strong> – Installs GRUB for BIOS systems.
 - <code>--boot-directory=/boot</code> specifies where GRUB files go.
-- Replace <code>/dev/sdY</code> with your actual target disk.</p></pre>
+- Replace <code>/dev/sdY</code> with your actual target disk.</p>
 				</div>
 
 				<p class="warn"><strong>Warning:</strong> Make sure to install for both <strong>UEFI</strong> and <strong>Legacy</strong> modes to ensure the USB boots on both.</p>
 
 				<p><strong>Generate GRUB configuration</strong></p>
 				<div class="codeblock">
-					<pre><code>grub-mkconfig -o /boot/grub/grub.cfg</code>
-<p class="note"><strong>grub-mkconfig</strong> – Automatically generates the GRUB configuration file, detecting all kernels and operating systems.</p></pre>
+					<pre><code>grub-mkconfig -o /boot/grub/grub.cfg</code></pre>
+<p class="note"><strong>grub-mkconfig</strong> – Automatically generates the GRUB configuration file, detecting all kernels and operating systems.</p>
 				</div>
 
 				<p class="red"><strong>Warning:</strong> Make sure to replace <code>sdY</code> with your actual device. Installing GRUB to the wrong device can prevent your system from booting.</p>
@@ -341,23 +347,23 @@ with proper modules and hooks.</p></pre>
 			<section id="network">
 				<h2>13 - Networking, Hosts, and DNS</h2>
 				<div class="codeblock">
-					<pre><code>systemctl enable systemd-networkd</code>
-<p class="note"><strong>systemd-networkd</strong> – Enables the systemd network service at boot, which manages network interfaces automatically.</p></pre>
+					<pre><code>systemctl enable systemd-networkd</code></pre>
+<p class="note"><strong>systemd-networkd</strong> – Enables the systemd network service at boot, which manages network interfaces automatically.</p>
 
-					<pre><code>systemctl enable systemd-resolved</code>
-<p class="note">Provides DNS resolution and caching for the system, required for hostname lookups and internet connectivity.</p></pre>
+					<pre><code>systemctl enable systemd-resolved</code></pre>
+<p class="note">Provides DNS resolution and caching for the system, required for hostname lookups and internet connectivity.</p>
 
-					<pre><code>systemctl enable NetworkManager</code>
-<p class="note"><strong>NetworkManager</strong> – A higher-level tool to manage wired, wireless, and VPN connections with CLI or GUI tools.</p></pre>
+					<pre><code>systemctl enable NetworkManager</code></pre>
+<p class="note"><strong>NetworkManager</strong> – A higher-level tool to manage wired, wireless, and VPN connections with CLI or GUI tools.</p>
 
 					<pre><code>host=$(cat /etc/hostname)
-sh -c "printf '127.0.0.1   localhost\n::1   localhost\n127.0.1.1   $host.localdomain   $host\n' > /etc/hosts"</code>
+sh -c "printf '127.0.0.1   localhost\n::1   localhost\n127.0.1.1   $host.localdomain   $host\n' > /etc/hosts"</code></pre>
 <p class="note">Maps hostnames to IP addresses locally.
-This ensures your system can resolve its own hostname and loopback addresses without querying DNS.</p></pre>
+This ensures your system can resolve its own hostname and loopback addresses without querying DNS.</p>
 
-					<pre><code>sh -c 'printf "nameserver 8.8.8.8\nnameserver 1.1.1.1\n" >> /etc/resolv.conf'</code>
+					<pre><code>sh -c 'printf "nameserver 8.8.8.8\nnameserver 1.1.1.1\n" >> /etc/resolv.conf'</code></pre>
 <p class="note"><strong>/etc/resolv.conf</strong> – Adds public DNS servers (Google and Cloudflare) for name resolution.
-To ensures the system can resolve domain names on the internet.</p></pre>
+To ensures the system can resolve domain names on the internet.</p>
 				</div>
 			</section>
 
@@ -397,25 +403,25 @@ To ensures the system can resolve domain names on the internet.</p></pre>
 					</ul>
 					<p class="note">These packages install XFCE, essential utilities, audio/video support, network management, Bluetooth, and common CLI tools for daily usage.</p>
 
-					<pre><code>systemctl enable lightdm</code>
-<p class="note"><strong>systemctl enable lightdm</strong> – Starts the display manager automatically at boot, providing a login screen.</p></pre>
+					<pre><code>systemctl enable lightdm</code></pre>
+<p class="note"><strong>systemctl enable lightdm</strong> – Starts the display manager automatically at boot, providing a login screen.</p>
 
-					<pre><code>systemctl enable bluetooth</code>
-<p class="note"><strong>systemctl enable bluetooth</strong> – Starts the Bluetooth service automatically at boot for device pairing and management.</p></pre>
+					<pre><code>systemctl enable bluetooth</code></pre>
+<p class="note"><strong>systemctl enable bluetooth</strong> – Starts the Bluetooth service automatically at boot for device pairing and management.</p>
 				</div>
 			</section>
 
 			<section id="finish">
 				<h2>15 - Finish</h2>
 				<div class="codeblock">
-					<pre><code>exit</code>
-<p class="note"><strong>exit</strong> – Leaves the chroot environment, returning to the live installer system.</p></pre>
+					<pre><code>exit</code></pre>
+<p class="note"><strong>exit</strong> – Leaves the chroot environment, returning to the live installer system.</p>
 
-					<pre><code>umount -R /mnt</code>
-<p class="note">Recursively unmounts all partitions mounted under <code>/mnt</code>, ensuring no filesystems are left mounted before shutdown.</p></pre>
+					<pre><code>umount -R /mnt</code></pre>
+<p class="note">Recursively unmounts all partitions mounted under <code>/mnt</code>, ensuring no filesystems are left mounted before shutdown.</p>
 
-					<pre><code>poweroff</code>
-<p class="note">Shuts down the installer system safely. After this, you can remove the installation media and boot your new system.</p></pre>
+					<pre><code>poweroff</code></pre>
+<p class="note">Shuts down the installer system safely. After this, you can remove the installation media and boot your new system.</p>
 				</div>
 
 
