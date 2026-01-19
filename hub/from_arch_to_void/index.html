@@ -10,7 +10,7 @@
 		<div class="container">
 			<header>
 				<div class="title">
-					<h1>Switching from Arch Linux to Void Linux</h1>
+					<h1>Switching From Arch Linux to Void Linux</h1>
 					<br>
 					<div class="muted">Quick notes, command mappings, checklist and things to watch for when migrating.</div>
 				</div>
@@ -82,19 +82,21 @@
 
 					<section class="card" id="post-install-commands">
 						<h2>Useful post-install commands</h2>
-<pre><code>sudo xbps-install -Su    # update</code>
-<code>sudo xbps-install -S base-system    # example: install base meta</code>
-<code>sudo xbps-install -S linux    # install kernel (virtual package 'linux')</code>
-<code>sudo xbps-reconfigure -f glibc-locales    # if you need to reconfigure locales (glibc images)</code>
-<code>sudo xbps-reconfigure -fa    # To reconfigure everything</code></pre>
+<pre>
+<code>sudo xbps-install -Su                     # Update the system</code>
+<code>sudo xbps-install -S base-system          # Example: install base meta</code>
+<code>sudo xbps-install -S linux                # Install kernel (virtual package 'linux')</code>
+<code>sudo xbps-reconfigure -f glibc-locales    # If you need to reconfigure locales (glibc images)</code>
+<code>sudo xbps-reconfigure -fa                 # To reconfigure everything</code>
+</pre>
 					</section>
 
 					<section class="card" id="resources">
 						<h2>Resources & further reading</h2>
 						<ul>
-							<li>Void Linux handbook and wiki (search official Void docs).</li>
-							<li>xbps-src manual building packages from source.</li>
-							<li>runit basics and examples.</li>
+							<li><a href="https://docs.voidlinux.org/">Void Linux handbook/wiki</a>.</li>
+							<li><a href="https://github.com/void-linux/xbps">XBPS</a></li>
+							<li><a href="https://smarden.org/runit/">Runit</a></li>
 						</ul>
 					</section>
 				</main>
