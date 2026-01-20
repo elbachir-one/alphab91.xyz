@@ -1,0 +1,111 @@
+:root {
+	--bg: #000000;
+	--bg-card: #1a1a1a;
+	--text: #eaf2f8;
+	--muted: #9aa7b2;
+	--accent: #4caf50;
+	--radius: 8px;
+	--pad: 16px;
+	--font-base: 17px;
+	--mono: "Fira Code", "SFMono-Regular", Menlo, monospace;
+
+	--code-keyword: #ff79c6;
+	--code-function: #50fa7b;
+	--code-comment: #6272a4;
+	--code-string: #f1fa8c;
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font-family: Inter, sans-serif;
+	background-color: var(--bg);
+	color: var(--text);
+	line-height: 1.6;
+	padding: 1rem;
+}
+
+a {
+	color: var(--accent);
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+h1, h2, h3 {
+	margin: 1rem 0;
+}
+
+h1 {
+	font-size: 2rem;
+	text-align: center;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 2rem;
+}
+
+ul {
+	margin-left: 1.5rem;
+	margin-bottom: 1rem;
+}
+
+li {
+	margin-bottom: 0.5rem;
+}
+
+pre {
+	background-color: var(--bg-card);
+	padding: var(--pad);
+	border-radius: var(--radius);
+	overflow-x: auto;
+	font-family: var(--mono);
+	font-size: 0.95rem;
+	line-height: 1.5;
+	margin-bottom: 1rem;
+	color: var(--text);
+}
+
+pre code {
+	display: block;
+}
+
+pre code span.keyword { color: var(--code-keyword); }
+pre code span.function { color: var(--code-function); }
+pre code span.comment { color: var(--code-comment); font-style: italic; }
+pre code span.string { color: var(--code-string); }
+
+code {
+	font-family: var(--mono);
+}
+
+.note {
+	background-color: #111111;
+	border-left: 4px solid var(--accent);
+	padding: 0.5rem 1rem;
+	margin: 1rem 0;
+	border-radius: 5px;
+	color: var(--muted);
+}
+
+.last {
+	text-align: center;
+}
+
+@media (max-width: 600px) {
+	body {
+		padding: 0.5rem;
+		font-size: 16px;
+	}
+
+	pre {
+		padding: 10px;
+	}
+}

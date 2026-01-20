@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>AUR Packaging Guide</title>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+
+		<h1>AUR Packaging Guide</h1>
+
+		<br>
+
+		<ul>
+			<li>Create a directory for your packages if it does not exist. Call it <code>AUR</code>.</li>
+			<pre><code>mkdir $HOME/AUR</code></pre>
+			<li>Generate an SSH key pair named <code>aur</code>:
+				<pre><code>ssh-keygen -f ~/.ssh/aur</code></pre>
+			</li>
+			<li>Copy the public key and add it to your AUR account: <a href="https://aur.archlinux.org" target="_blank">https://aur.archlinux.org</a></li>
+			<li>Configure SSH for authentication:
+				<pre><code>nano ~/.ssh/config</code></pre>
+				<pre><code>Host aur.archlinux.org
+     IdentityFile ~/.ssh/aur
+     User aur</code></pre>
+			</li>
+			<li>Clone the repository for your package:
+				<pre><code>cd ~/AUR
+git clone ssh://aur@aur.archlinux.org/pkgname.git
+cd pkgname/</code></pre>
+				<div class="note">
+					Note:<br>
+					- If it’s a new package, Git will say "You have cloned an empty directory".<br>
+					- If it’s an existing package, you’ll have the repo with all files already there.
+				</div>
+			</li>
+			<li>Go into the cloned repository and add a <code>.gitignore</code> file with <code>*</code> inside. This ignores everything unless you force-add it with <code>git add -f filename</code>.</li>
+			<li>Sanity-check the <code>PKGBUILD</code> using <code>namecap</code>:
+				<pre><code>namecap PKGBUILD</code></pre>
+				<div class="note">No results mean your PKGBUILD is good to go.</div>
+			</li>
+			<li>Build the package to ensure it compiles correctly. Update the SHA256 sums:
+				<pre><code>updpkgsums</code></pre>
+			</li>
+			<li>Every time before pushing, update <code>.SRCINFO</code>:
+				<pre><code>makepkg --printsrcinfo > .SRCINFO</code></pre>
+			</li>
+			<li>Add the <code>PKGBUILD</code> and <code>.SRCINFO</code> files:
+				<pre><code>git add -f PKGBUILD .SRCINFO</code></pre>
+			</li>
+			<li>Commit your changes:
+				<pre><code>git commit -m "Your commit message"</code></pre>
+			</li>
+			<li>Push to the AUR:
+				<pre><code>git push</code></pre>
+			</li>
+		</ul>
+
+		<br>
+
+		<p class="last">Et voilà</p>
+
+	</body>
+</html>
