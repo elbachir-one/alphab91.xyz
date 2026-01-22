@@ -8,21 +8,14 @@ body {
 	font-size: 1.1rem;
 }
 
-header {
-	background-color: rgba(40, 40, 40, 0.6);
-	color: #fe8019;
-	padding: 20px;
+h1 {
+	margin-top: 50px;
 	text-align: center;
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	z-index: 1000;
 }
 
 img.header-image {
 	display: block;
-	margin: 160px auto 10px;
+	margin: 60px auto 10px;
 	max-width: 80%;
 	height: auto;
 	border-radius: 10px;
@@ -83,4 +76,8 @@ a:hover {
 
 ol, ul {
 	padding-left: 20px;
+}
+
+.last {
+	text-align: center;
 }
