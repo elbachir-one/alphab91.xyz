@@ -34,11 +34,18 @@
 		<pre><code>ffmpeg -i video.mp4 -i audio.wav -c:v copy -c:a aac output.mp4</code></pre>
 
 		<h2>How to Cut Video or Audio</h2>
+
 		<pre><code>ffmpeg -i input.mkv -ss 00:03:00 -to 00:03:44 -async 1 cut.mkv</code>
 <code>ffmpeg -i input.mp4 -ss 01:43:46 -to 01:44:30 output.mp3</code></pre>
-		<p><strong>The <code>-ss</code> is the start of the cutting and <code>-to</code> is the end</strong></p>
+
+		<p><strong><code>-ss</code> specifies the start time and <code>-to</code> specifies the end time for cutting.</strong></p>
+		<p>The <strong><code>-async 1</code></strong> option forces re-encoding of the video/audio to ensure proper timing.</p>
+
+		<pre><code>ffmpeg -ss 00:03:00 -to 00:03:44 -i input.mp4 -c copy output.mp4</code></pre>
+		<p>The <strong><code>-c copy</code></strong> option cuts the video/audio without re-encoding, which is faster and avoids quality loss.</p>
 
 		<h2>How to Download Multiple Videos Simultaneously using youtube-dl</h2>
+
 		<p>To simulate and see the resolution:</p>
 		<pre><code>youtube-dl -ct --simulate --batch-file='/path/to/batch-file.txt'</code></pre>
 		<p>To download:</p>
@@ -76,7 +83,9 @@
 		<h2>How to Extract Frames from a GIF</h2>
 		<pre><code>ffmpeg -i input.gif -r 10 output_%03d.png</code></pre>
 
-		<p><em>***Et voilà!***</em></p>
+		<br>
+
+		<p class="last"><em>***Et voilà!***</em></p>
 
 	</body>
 </html>
