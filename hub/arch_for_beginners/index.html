@@ -35,6 +35,7 @@
 					<li><a href="#grub">GRUB Dual Boot (Optional)</a></li>
 					<li><a href="#grub-install">Install GRUB</a></li>
 					<li><a href="#network">Networking</a></li>
+					<li><a href="#hosts">Hosts</a></li>
 					<li><a href="#desktop">Desktop environment</a></li>
 					<li><a href="#finish">Finish</a></li>
 					<li><a href="#post">Post Installation</a></li>
@@ -191,7 +192,7 @@
 				<h2>7 - Install Base System</h2>
 				<div class="codeblock">
 					<pre><code>pacstrap -K /mnt linux linux-firmware linux-headers base base-devel nano \
-		networkmanager grub efibootmgr os-prober bash-completion iwd</code></pre>
+		networkmanager grub efibootmgr os-prober bash-completion wpa_supplicant</code></pre>
 					<p class="note"><strong>Tip:</strong> You will need to add your CPU microcode package: for Intel, add <code>intel-ucode</code>; for AMD, add <code>amd-ucode</code>.</p>
 					<hr>
 					<ul>
@@ -206,7 +207,7 @@
 						<li><strong>efibootmgr</strong> – EFI boot manager to configure UEFI boot entries.</li>
 						<li><strong>os-prober</strong> – Detects other OS installations for bootloader configuration.</li>
 						<li><strong>bash-completion</strong> – Bash completions for core commands.</li>
-						<li><strong>iwd</strong> – Wireless daemon for managing Wi-Fi connections.</li>
+						<li><strong>wpa_supplicant</strong> – Handles Wi-Fi authentication.</li>
 						<li><strong>intel-ucode</strong> – Microcode updates for Intel CPUs.</li>
 						<li><strong>amd-ucode</strong> – Microcode updates for AMD CPUs.</li>
 					</ul>
@@ -242,7 +243,7 @@
 					<p class="note">Writes the system time to the hardware clock so it stays accurate after reboots.</p>
 
 					<pre><code>nano /etc/locale.gen</code></pre>
-					<p class="note">Uncomment the locale you want to use by removing the <strong>#</strong> and then save the file.</p>
+					<p class="note">Uncomment the locale you want to use by removing the <strong>#</strong> in this example it's <code><strong>en_US.UTF-8 UTF-8</strong></code> and then save the file.</p>
 
 					<pre><code>locale-gen</code></pre>
 					<p class="note">Generates the locale files specified in <code>/etc/locale.gen</code>.</p>
@@ -278,15 +279,22 @@
 					<pre><code>GRUB_DISABLE_OS_PROBER=false     # Uncomment the line by removing the hashtag (#), then save and exit the file</code></pre>
 					<p class="note">This enables GRUB to detect and recognize other operating systems.</p>
 
+					<p class="note">As for Windows, if it’s on another drive, you should be fine.<br>
+					If it’s on the same drive, you should do the following after finishing/rebooting the installation:<br>
+					<pre><code>sudo mkdir -p /mnt/windows-efi
+sudo mount /dev/sda1 /mnt/windows-efi</code></pre>
+					<p class="note">
+					<code>/dev/sda1</code> or <code>/dev/nvme0n1p1</code> should be the EFI Windows partition.<br>
+					To find out which one it is, use <code>lsblk -f</code>.<br>
+					After that, run <code>sudo grub-mkconfig -o /boot/grub/grub.cfg</code>. In the output, you should see Windows being detected.</p>
 
 					<p class="red">Use this only if you have another OS and want to dual boot between Arch Linux and that OS.
-					You can skip this step if you don’t want to set up dual booting.</p></pre>
+					You can skip this step if you don’t want to set up dual booting.</p>
 			</section>
 
 			<section id="grub-install">
 				<h2>11 - Install GRUB</h2>
 
-				<p><strong>UEFI</strong></p>
 				<div class="codeblock">
 					<pre><code>grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --recheck</code></pre>
 					<p class="note"><code>--target=x86_64-efi</code> installs GRUB for UEFI systems.
@@ -306,29 +314,88 @@
 			</section>
 
 			<section id="network">
-				<h2>12 - Networking, Hosts</h2>
+				<h2>12 - Networking</h2>
 				<div class="codeblock">
-					<pre><code>systemctl enable systemd-networkd</code></pre>
-					<p class="note">Enables the systemd network service at boot, which manages network interfaces automatically.</p>
 
-					<pre><code>systemctl enable systemd-resolved</code></pre>
-					<p class="note">Provides DNS resolution and caching for the system, required for hostname lookups and internet connectivity.</p>
-
+					<h3>Option 1 (Recommended): Using NetworkManager</h3>
 					<pre><code>systemctl enable NetworkManager</code></pre>
-					<p class="note">A higher-level tool to manage wired, wireless, and VPN connections with CLI or GUI tools.</p>
+					<p class="note">
+					NetworkManager handles wired, wireless, and VPN connections.<br>
+					It also manages DNS automatically.<br>
+					After installation, to add your Wi-Fi network, just run <code>sudo nmtui</code> and select your Wi-Fi.
+					</p>
 
-					<p>Edit the file <strong><code>/etc/hosts</code></strong> with <code>nano</code> and add the following lines</p>
-					<pre><code>127.0.0.1   localhost</code>
-<code>::1         localhost</code>
-<code>127.0.1.1   YourHostName.localdomain   YourHostName</code></pre>
-					<p class="note">Change <strong>YourHostName</strong> to your own host name.
-					Maps hostnames to IP addresses locally.
-					This ensures your system can resolve its own hostname and loopback addresses without querying DNS.</p>
+					<h3>Option 2: Using systemd-networkd</h3>
+					<pre><code>systemctl enable systemd-networkd</code>
+<code>systemctl enable systemd-resolved</code></pre>
+					<p class="note">
+					<code>systemd-networkd</code> manages network interfaces automatically.<br>
+					<code>systemd-resolved</code> provides DNS resolution and caching.
+					</p>
+
+					<h4>Ethernet Configuration</h4>
+
+					<pre><code>nano /etc/systemd/network/en.network</code></pre>
+					<pre><code>[Match]
+Name=en*
+
+[Network]
+DHCP=yes</code></pre>
+					<p class="note">
+					Replace <code>Name=en*</code> with your Ethernet interface if needed (e.g., <code>enp3s0</code>).<br>
+					To find the interface name, use <code>ip a</code> or <code>ip link</code>.<br>
+					It's fine to use <code>Name=en*</code>.<br>
+					This setup automatically obtains IP, gateway, and DNS from DHCP.
+					</p>
+
+					<h4>Wi-Fi Configuration</h4>
+					<p>Create a <code>wpa_supplicant</code> config for your Wi-Fi interface (replace <code>wlp3s0</code> with your interface):</p>
+					<pre><code>nano /etc/wpa_supplicant/wpa_supplicant-wlp3s0.conf</code></pre>
+					<pre><code>ctrl_interface=DIR=/run/wpa_supplicant GROUP=netdev
+update_config=1
+
+network={
+	ssid="YourWiFiSSID"
+	psk="YourWiFiPassword"
+	key_mgmt=WPA-PSK
+}</code></pre>
+					<p class="note">
+					Replace <code>YourWiFiSSID</code> (WiFi Name) and <code>YourWiFiPassword</code> with your Wi-Fi credentials.
+					</p>
+					<p>Enable <code>wpa_supplicant</code> for the interface:</p>
+					<pre><code>systemctl enable wpa_supplicant@wlp3s0</code></pre>
+
+					<h4>Wi-Fi networkd config (DHCP)</h4>
+					<pre><code>nano /etc/systemd/network/wl.network</code></pre>
+					<pre><code>[Match]
+Name=wl*
+
+[Network]
+DHCP=yes</code></pre>
+					<p class="note">
+					<code>systemd-networkd</code> handles IP, gateway, and DNS after <code>wpa_supplicant</code> connects.
+					</p>
+
+					</div>
+			</section>
+
+			<section id="hosts">
+					<h2>13 - Hosts</h2>
+				<div class="codeblock">
+					<p>Edit <strong><code>/etc/hosts</code></strong> with <code>nano</code> and add:</p>
+					<pre><code>127.0.0.1   localhost
+::1         localhost
+127.0.1.1   YourHostName.localdomain   YourHostName</code></pre>
+					<p class="note">
+					Replace <strong>YourHostName</strong> with your system’s hostname.<br>
+					Maps hostnames to IP addresses locally, ensuring your system can resolve its own hostname without querying DNS.
+					</p>
+
 				</div>
 			</section>
 
 			<section id="desktop">
-				<h2>13 - Desktop Environment (optional)</h2>
+				<h2>14 - Desktop Environment (optional)</h2>
 				<div class="codeblock">
 					<pre><code>pacman -S xfce4 xfce4-goodies lightdm lightdm-gtk-greeter network-manager-applet \
 	  bluez bluez-utils wget curl git xdg-utils gvfs openssh alsa-utils \
@@ -377,7 +444,7 @@
 			</section>
 
 			<section id="finish">
-				<h2>14 - Finish</h2>
+				<h2>15 - Finish</h2>
 				<div class="codeblock">
 					<pre><code>exit</code></pre>
 					<p class="note">Leaves the chroot environment, returning to the live installer system.</p>
@@ -392,7 +459,7 @@
 				<p class="warn"><strong>Warning:</strong> Remove the installer USB and boot your computer.</p>
 
 				<section id="post">
-					<h2>15 - Post Installation</h2>
+					<h2>16 - Post Installation</h2>
 
 					<p class="warn">After booting and logging in as your user, the <strong>DNS</strong> step is important, while the <strong>YAY</strong> step is optional.</p>
 					<p class="ok">Let's set up the <strong>DNS</strong></p>
@@ -405,7 +472,7 @@
 					<p class="ok">Let's set up <strong>YAY</strong>, the AUR helper.</p>
 
 					<pre><code>cd /tmp/ && git clone https://aur.archlinux.org/yay</code>
-<code>cd yay/ && makepkgs -si --noconfirm</code></pre>
+<code>cd yay/ && makepkg -si --noconfirm</code></pre>
 					<p class="ok">And now you can just use <strong>yay</strong> instead of <strong>pacman</strong>.</p>
 					<pre><code>yay -Syu</code>
 <code>yay -S fastfetch</code>
