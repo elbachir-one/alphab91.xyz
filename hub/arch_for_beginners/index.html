@@ -76,7 +76,7 @@
 
 			<section id="connect-wifi">
 				<h2>3 - Connect to the Internet</h2>
-				<p>Now plug in the USB installer</p>
+				<p>Now plug in the USB installer and boot from it.</p>
 				<p class="warn">This next step is only necessary if you are using a <strong>Wi-Fi connection</strong>. If you are using <strong>Ethernet</strong>, you can skip it.</p>
 				<p>Let’s connect to the internet using <code>iwctl</code>:</p>
 				<ol>
@@ -106,6 +106,7 @@
 					<div class="codeblock">
 						<pre><code>ping -c3 archlinux.org</code></pre>
 					</div>
+					<p class="note">You should see some packets being sent and received.</p>
 				</ol>
 			</section>
 
@@ -138,11 +139,15 @@
 						<tr><td>3</td><td>Home</td><td>Rest</td><td>Ext4</td><td>/home</td></tr>
 					</tbody>
 				</table>
+
+				<br>
+
+				<p class="ok">Open the target drive with <strong>cfdisk</strong>, you need to create two or three partitions depends if you want a <strong>home</strong> partition or not: an <strong>EFI</strong> partition and a <strong>root</strong> partition. In this example it's thee partitions.</p>
+
+				<p class="red"><strong>Warning:</strong> Double‑check the target device (e.g. <code>/dev/sdY</code>) with <code>lsblk</code> to avoid wiping the wrong disk.</p>
 				<div class="codeblock">
 					<pre><code>cfdisk /dev/sdY</code></pre>
 				</div>
-				<p class="ok">After opening the target drive with <strong>cfdisk</strong>, you need to create three partitions: an EFI partition and a root partition.</p>
-				<p class="red"><strong>Warning:</strong> Double‑check the target device (e.g. <code>/dev/sdY</code>) with <code>lsblk</code> to avoid wiping the wrong disk.</p>
 			</section>
 
 			<section id="fs">
@@ -150,40 +155,41 @@
 				<p>Now that the partitions are ready, we need to format them with appropriate filesystems.</p>
 
 				<div class="codeblock">
-					<pre><code>mkfs.vfat -F32 /dev/sdY1</code></pre>
+
 					<p class="note">Formats the first partition as FAT32. This is typically used for EFI System Partitions.</p>
+					<pre><code>mkfs.vfat -F32 /dev/sdY1</code></pre>
 
+					<p class="note">Formats the second partition (root partition) with the Ext4 filesystem.</p>
 					<pre><code>mkfs.ext4 /dev/sdY2</code></pre>
-					<p class="note">Formats the second partition with the Ext4 filesystem</p>
 
+					<p class="note">Formats the 3 partition (home partition) with the Ext4 filesystem.</p>
 					<pre><code>mkfs.ext4 /dev/sdY3</code></pre>
-					<p class="note">Formats the 3 partition with the Ext4 filesystem</p>
 
 				</div>
 			</section>
 
 			<section id="ext4">
 				<h2>6 - Mount the Filesystem</h2>
-				<p>Next, we mount the root filesystem, the home partition, and the EFI partition.</p>
+				<p>Next, we mount the root filesystem, the EFI partition, and the home partition.</p>
 
 				<div class="codeblock">
+					<p class="note">Mounts the second partition (root partition) to <code>/mnt</code>.</p>
 					<pre><code>mount /dev/sdY2 /mnt</code></pre>
-					<p class="note">Mounts the second partition to <code>/mnt</code></p>
 
+					<p class="note">Creates the <code>/boot</code> directory inside <code>/mnt</code> to mount the corresponding partition (EFI partition).</p>
 					<pre><code>mkdir -vp /mnt/boot</code></pre>
-					<p class="note">Creates the <code>/boot</code> directory inside <code>/mnt</code> to mount the corresponding partition.</p>
 
-					<pre><code>mount /dev/sdY1 /mnt/boot</code></pre>
 					<p class="note">Mounts the EFI system partition at <code>/mnt/boot</code>.</p>
+					<pre><code>mount /dev/sdY1 /mnt/boot</code></pre>
 
-					<pre><code>mkdir -vp /mnt/home</code></pre>
 					<p class="note">Creates the <code>/home</code> directory inside <code>/mnt</code> to mount the corresponding partition.</p>
+					<pre><code>mkdir -vp /mnt/home</code></pre>
 
-					<pre><code>mount /dev/sdY3 /mnt/home</code></pre>
 					<p class="note">Mounts the Home partition at <code>/mnt/home</code>.</p>
+					<pre><code>mount /dev/sdY3 /mnt/home</code></pre>
 
-					<pre><code>lsblk -pf /dev/sdY</code></pre>
 					<p class="note">Lists the partitions, filesystems, and mount points to verify everything is set up correctly.</p>
+					<pre><code>lsblk -pf /dev/sdY</code></pre>
 				</div>
 			</section>
 
@@ -215,9 +221,9 @@
 
 			<section id="fstab">
 				<h2>8 - Generate the Fstab</h2>
+					<p class="note">Generates the <code>fstab</code> file using UUIDs (-U) for all mounted partitions under <code>/mnt</code>, and writes it to <code>/mnt/etc/fstab</code>. This file tells the system which partitions to mount at boot.</p>
 				<div class="codeblock">
 					<pre><code>genfstab -U /mnt &gt; /mnt/etc/fstab</code></pre>
-					<p class="note">Generates the <code>fstab</code> file using UUIDs (-U) for all mounted partitions under <code>/mnt</code>, and writes it to <code>/mnt/etc/fstab</code>. This file tells the system which partitions to mount at boot.</p>
 				</div>
 			</section>
 
@@ -230,11 +236,10 @@
 					<p class="note">Sets the system name to <code>zombie</code>, Change it to your own hostname, which identifies your computer on networks.</p>
 					<pre><code>echo "zombie" &gt; /etc/hostname</code></pre>
 
-					<p class="note">Use the above command with your city name to find your timezone.<br>
-You can then use its output in the next command.</p>
+					<p class="note">Use the command with your city name to find your timezone.<br>
+You can then use its output in the next command that links your local timezone file to <code>/etc/localtime</code> for correct system time.</p>
 					<pre><code>timedatectl list-timezones | grep Tokyo</code></pre>
 
-					<p class="note">Links your local timezone file to <code>/etc/localtime</code> for correct system time. Set it to your own localtime</p>
 					<pre><code>ln -sf /usr/share/zoneinfo/Japan/Tokyo /etc/localtime</code></pre>
 
 					<p class="note">Writes the system time to the hardware clock so it stays accurate after reboots.</p>
@@ -262,7 +267,7 @@ You can then use its output in the next command.</p>
 					<p class="note">Sets the password for your new user account.</p>
 					<pre><code>passwd &lt;yourUserName&gt;</code></pre>
 
-					<p class="note">Edits the <code>sudoers</code> file safely. This allows users in the <code>wheel</code> group to use <code>sudo</code> for administrative tasks.
+					<p class="note">This allows users in the <code>wheel</code> group to use <code>sudo</code> for administrative tasks.
 					Uncomment the line at the bottom of the file by removing the <strong>#</strong> from: <strong>%wheel ALL=(ALL) ALL</strong> and save the file.</p>
 					<pre><code>EDITOR=nano visudo</code></pre>
 				</div>
@@ -316,17 +321,19 @@ mount /dev/sda1 /mnt/windows-efi</code></pre>
 				<h2>11 - Networking</h2>
 				<div class="codeblock">
 
-					<h3>- Option 1 (Recommended): Using NetworkManager</h3>
-					<pre><code>systemctl enable NetworkManager</code></pre>
+					<h3>Option 1 (Recommended): Using NetworkManager</h3>
+
 					<p class="note">
 					NetworkManager handles wired, wireless, and VPN connections.<br>
-					It also manages DNS automatically.<br>
-					After installation, to add your Wi-Fi network, just run <code>sudo nmtui</code> and select your Wi-Fi.
-					</p>
+					It also manages DNS automatically.</p>
+
+					<pre><code>systemctl enable NetworkManager</code></pre>
+
+					<p class="note">After installing the system and rebooting, to add your Wi-Fi network, just run <code>sudo nmtui</code> and select your Wi-Fi.</p>
 
 					<br>
 
-					<h3>- Option 2: Using systemd-networkd</h3>
+					<h3>Option 2: Using systemd-networkd</h3>
 					<pre><code>systemctl enable systemd-networkd</code>
 <code>systemctl enable systemd-resolved</code></pre>
 					<p class="note">
@@ -343,9 +350,9 @@ Name=en*
 [Network]
 DHCP=yes</code></pre>
 					<p class="note">
-					Replace <code>Name=en*</code> with your Ethernet interface if needed (e.g., <code>enp3s0</code>).<br>
+					Replace <code>en*</code> with your Ethernet interface if needed (e.g., <code>enp3s0</code>).<br>
 					To find the interface name, use <code>ip a</code> or <code>ip link</code>.<br>
-					It's fine to use <code>Name=en*</code>.<br>
+					It's fine to use <code>en*</code>.<br>
 					This setup automatically obtains IP, gateway, and DNS from DHCP.
 					</p>
 
@@ -467,7 +474,8 @@ DHCP=yes</code></pre>
 				<section id="post">
 					<h2>15 - Post Installation</h2>
 
-					<p class="warn">After booting and logging in as your user, the <strong>DNS</strong> step is important, while the <strong>YAY</strong> step is optional.</p>
+					<p class="warn">After booting and logging in as your user, the <strong>DNS</strong> step and the <strong>YAY</strong> step are completely optional.</p>
+
 					<p class="ok">Let's set up the <strong>DNS</strong></p>
 					<p>Edit the file <strong><code>/etc/resolv.conf</code></strong> with <code>nano</code> and add the following lines</p>
 <pre><code>nameserver 8.8.8.8</code>
