@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Installing Arch Linux on a USB with Ext4 + LUKS2)</title>
+		<title>Installing Arch Linux on a USB with Ext4 + LUKS2</title>
 		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
@@ -33,7 +33,6 @@
 					<li><a href="#config">System configuration</a></li>
 					<li><a href="#grub">GRUB + encryption</a></li>
 					<li><a href="#initramfs">mkinitcpio</a></li>
-					<li><a href="#grub-install">Install GRUB</a></li>
 					<li><a href="#network">Networking</a></li>
 					<li><a href="#desktop">Desktop environment</a></li>
 					<li><a href="#finish">Finish</a></li>
@@ -122,10 +121,13 @@
 						<tr><td>3</td><td>Root</td><td>Rest</td><td>LUKS2 → Ext4</td><td>/</td></tr>
 					</tbody>
 				</table>
+
+				<br>
+
+				<p class="red"><strong>Warning:</strong> Double‑check the target device (e.g. <code>/dev/sdY</code>) with <code>lsblk</code> to avoid wiping the wrong disk.</p>
 				<div class="codeblock">
 					<pre><code>cfdisk /dev/sdY</code></pre>
 				</div>
-				<p class="red"><strong>Warning:</strong> Double‑check the target device (e.g. <code>/dev/sdY</code>) with <code>lsblk</code> to avoid wiping the wrong disk.</p>
 			</section>
 
 			<section id="fs">
@@ -133,27 +135,30 @@
 				<p>Now that the partitions are ready, we need to format them with appropriate filesystems and optionally set up encryption for sensitive data.</p>
 
 				<div class="codeblock">
-					<pre><code>mkfs.ext2 /dev/sdY1</code></pre>
+
 					<p class="note">Formats the first partition (<code>/dev/sdY1</code>) with the EXT2 filesystem.</p>
+					<pre><code>mkfs.ext2 /dev/sdY1</code></pre>
 
-					<pre><code>mkfs.vfat -F32 /dev/sdY2</code></pre>
 					<p class="note">Formats the second partition (<code>/dev/sdY2</code>) as FAT32. This is typically used for EFI System Partitions.</p>
+					<pre><code>mkfs.vfat -F32 /dev/sdY2</code></pre>
 
-					<pre><code>cryptsetup luksFormat --type luks2 /dev/sdY3</code></pre><p class="note">Initializes LUKS2 encryption on the third partition (<code>/dev/sdY3</code>).
+					<p class="note">Initializes LUKS2 encryption on the third partition (<code>/dev/sdY3</code>).<br>
 Type <kbd>YES</kbd> in uppercase to confirm, then type a strong passphrase.</p>
 
-					<pre><code>cryptsetup luksOpen /dev/sdY3 cryptroot</code></pre>
-					<p class="note">Opens the LUKS-encrypted partition and maps it to <code>/dev/mapper/cryptroot</code>.
+					<pre><code>cryptsetup luksFormat --type luks2 /dev/sdY3</code></pre>
+
+					<p class="note">Opens the LUKS-encrypted partition and maps it to <code>/dev/mapper/cryptroot</code>.<br>
 To interact with the partition as if it were unencrypted.</p>
+					<pre><code>cryptsetup luksOpen /dev/sdY3 cryptroot</code></pre>
 
 					<p class="warn">USB drives have a limited number of write cycles.
 					In this case, a better solution is to create a file system without journaling, since a
 					journaling file system consumes additional writes as the journal is updated.
 					Eventually, we are also going to configure systemd-journald to store logs in RAM.
 					</p>
-					<pre><code>mkfs.ext4 -O "^has_journal" /dev/mapper/cryptroot</code></pre>
-<p class="note">Formats the decrypted partition with the Ext4 filesystem while disabling
+					<p class="note">Formats the decrypted partition with the Ext4 filesystem while disabling
 the journaling feature using <code>-O "^has_journal"</code>.</p>
+					<pre><code>mkfs.ext4 -O "^has_journal" /dev/mapper/cryptroot</code></pre>
 				</div>
 			</section>
 
@@ -162,17 +167,16 @@ the journaling feature using <code>-O "^has_journal"</code>.</p>
 				<p>Next, we mount the root filesystem and the EFI partition</p>
 
 				<div class="codeblock">
+					<p class="note">Mounts the decrypted Ext4 partition to <code>/mnt</code></p>
 					<pre><code>mount /dev/mapper/cryptroot /mnt</code></pre>
-<p class="note">Mounts the decrypted Ext4 partition to <code>/mnt</code></p>
 
+					<p class="note">Create the <code>/boot</code> directory inside <code>/mnt</code> to mount the corresponding partition.<br>Mount the EFI system partition at <code>/mnt/boot</code>.</p>
 					<pre><code>mkdir -vp /mnt/boot</code></pre>
-<p class="note">Creates the <code>/boot</code> directory inside <code>/mnt</code> to mount the corresponding partition.</p>
 
 					<pre><code>mount /dev/sdY2 /mnt/boot</code></pre>
-<p class="note">Mounts the EFI system partition at <code>/mnt/boot</code>.</p>
 
+					<p class="note">Lists the partitions, filesystems, and mount points to verify everything is set up correctly.</p>
 					<pre><code>lsblk -pf /dev/sdY</code></pre>
-<p class="note">Lists the partitions, filesystems, and mount points to verify everything is set up correctly.</p>
 				</div>
 			</section>
 
@@ -207,165 +211,158 @@ the journaling feature using <code>-O "^has_journal"</code>.</p>
 
 			<section id="fstab">
 				<h2>8 - Generate fstab</h2>
+					<p class="note">Generates the <code>fstab</code> file using UUIDs (-U) for all mounted partitions under <code>/mnt</code>, and writes it to <code>/mnt/etc/fstab</code>. This file tells the system which partitions to mount at boot.</p>
 				<div class="codeblock">
 					<pre><code>genfstab -U /mnt &gt; /mnt/etc/fstab</code></pre>
-					<p class="note">Generates the <code>fstab</code> file using UUIDs (-U) for all mounted partitions under <code>/mnt</code>, and writes it to <code>/mnt/etc/fstab</code>. This file tells the system which partitions to mount at boot.</p>
 				</div>
 			</section>
 
 			<section id="config">
 				<h2>9 - System Configuration</h2>
 				<div class="codeblock">
+					<p class="note">Enters the new system environment at <code>/mnt</code>, so all following commands affect the installed system, not the live USB.</p>
 					<pre><code>arch-chroot /mnt</code></pre>
-<p class="note">Enters the new system environment at <code>/mnt</code>, so all following commands affect the installed system,
-not the live USB.</p>
 
+					<p class="note">Sets the system name to <code>zombie</code>, Change it to your own hostname, which identifies your computer on networks.</p>
 					<pre><code>echo "zombie" &gt; /etc/hostname</code></pre>
-<p class="note">Sets the system name to <code>zombie</code>, Change it to your own hostname, which identifies your computer on networks.</p>
 
+					<p class="note">Use the command with your city name to find your timezone.<br>
+You can then use its output in the next command to links your local timezone file to <code>/etc/localtime</code> for correct system time. Set it to your own localtime</p>
 					<pre><code>timedatectl list-timezones | grep Tokyo</code></pre>
-<p class="note">Use the above command with your city name to find your timezone.
-You can then use its output in the next command.</p>
 
 					<pre><code>ln -sf /usr/share/zoneinfo/Japan/Tokyo /etc/localtime</code></pre>
-<p class="note">Links your local timezone file to <code>/etc/localtime</code> for correct system time. Set it to your own localtime</p>
 
+					<p class="note">Writes the system time to the hardware clock so it stays accurate after reboots.</p>
 					<pre><code>hwclock --systohc</code></pre>
-<p class="note">Writes the system time to the hardware clock so it stays accurate after reboots.</p>
 
+					<p class="note">Enables the locale for system-wide use. Make sure to set your preferred language.</p>
 					<pre><code>echo "en_US.UTF-8 UTF-8" | tee -a /etc/locale.gen</code></pre>
-<p class="note">Enables the locale for system-wide use. Make sure to set your preferred language.</p>
 
+					<p class="note">Generates the locale files specified in <code>/etc/locale.gen</code>.</p>
 					<pre><code>locale-gen</code></pre>
-<p class="note">Generates the locale files specified in <code>/etc/locale.gen</code>.</p>
 
+					<p class="note">Sets the default system language environment variable.</p>
 					<pre><code>echo "LANG=en_US.UTF-8" &gt; /etc/locale.conf</code></pre>
-<p class="note">Sets the default system language environment variable.</p>
 
+					<p class="note">Add your own keymap.</p>
 					<pre><code>echo "KEYMAP=us" &gt; /etc/vconsole.conf</code></pre>
-<p class="note">Add your own keymap.</p>
 
+					<p class="note">Prompts to set a strong password for the root account.</p>
 					<pre><code>passwd</code></pre>
-<p class="note">Prompts to set a strong password for the root account.</p>
 
+					<p class="note">Defines the username you will create.</p>
 					<pre><code>auser=yourusername</code></pre>
-<p class="note">Defines the username you will create.</p>
 
+					<p class="note">Creates the user with a home directory and adds them to the <code>wheel</code> group for administrative privileges.</p>
 					<pre><code>useradd -mG wheel "$auser"</code></pre>
-<p class="note">Creates the user with a home directory and adds them to the <code>wheel</code> group for administrative privileges.</p>
 
+					<p class="note">Sets the password for your new user account.</p>
 					<pre><code>passwd "$auser"</code></pre>
-<p class="note">Sets the password for your new user account.</p>
 
-					<pre><code>EDITOR=nano visudo</code></pre>
-<p class="note">Edits the <code>sudoers</code> file safely. This allows users in the <code>wheel</code> group to use <code>sudo</code> for administrative tasks.
+					<p class="note">Edits the <code>sudoers</code> file safely. This allows users in the <code>wheel</code> group to use <code>sudo</code> for administrative tasks.<br>
 Uncomment the line at the bottom of the file by removing the <strong>#</strong> from: <strong>%wheel ALL=(ALL) ALL</strong></p>
+					<pre><code>EDITOR=nano visudo</code></pre>
 				</div>
 			</section>
 
 			<section id="grub">
 				<h2>10 - GRUB + Encryption</h2>
+				<h3>1 - Configure GRUB</h3>
 				<div class="codeblock">
+					<p class="note">Open the GRUB configuration file for editing. This file controls bootloader settings and kernel parameters.</p>
 					<pre><code>nano /etc/default/grub</code></pre>
-<p class="note">Open the GRUB configuration file for editing. This file controls bootloader settings and kernel parameters.</p>
 
+					<p class="note">This enables GRUB to recognize LUKS-encrypted partitions at boot, allowing you to enter the passphrase early.</p>
 					<pre><code>GRUB_ENABLE_CRYPTODISK=y     # Uncomment the line by removing the hashtag (#), then save and exit the file</code></pre>
-<p class="note">This enables GRUB to recognize LUKS-encrypted partitions at boot, allowing you to enter the passphrase early.</p>
 
+					<p class="note">Outputs the unique identifier of your LUKS encrypted partition. It tells GRUB which partition to unlock.</p>
 					<pre><code>cryptsetup luksUUID /dev/sdY3</code></pre>
-<p class="note">Outputs the unique identifier of your LUKS encrypted partition. It tells GRUB which partition to unlock.</p>
 
-					<pre><code>UUID=$(cryptsetup luksUUID /dev/sdY3)
-sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"cryptdevice=UUID=$UUID:root\"|" /etc/default/grub</code></pre>
-<p class="note">This two-line command retrieves the LUKS UUID automatically and updates the GRUB configuration safely, avoiding
+					<p class="note">This two-line command retrieves the LUKS UUID automatically and updates the GRUB configuration safely, avoiding
 manual copy/paste.</p>
+					<p class="warn"><strong>Warning:</strong> A single wrong character can make the system unbootable. Double‑check the UUID and syntax before updating GRUB.</p>
+					<pre><code>UUID=$(cryptsetup luksUUID /dev/sdY3)
+sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"cryptdevice=UUID=$UUID:cryptroot\"|" /etc/default/grub</code></pre>
+
+				<h3>2 - Install GRUB</h3>
+
+				<p class="warn"><strong>Warning:</strong> Make sure to install for both <strong>UEFI</strong> and <strong>Legacy</strong> modes to ensure the USB boots on both.</p>
+				<p><strong>UEFI</strong></p>
+<p class="note">Installs GRUB for UEFI systems.<br>
+- <code>--efi-directory=/boot</code> specifies the EFI system partition.<br>
+- <code>--bootloader-id=GRUB</code> names the boot entry.<br>
+- <code>--removable</code> makes it bootable on removable media.<br>
+- <code>--recheck</code> ensures device detection is refreshed.</p>
+				<div class="codeblock">
+					<pre><code>grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --removable --recheck</code></pre>
 				</div>
-<p class="warn"><strong>Warning:</strong> A single wrong character can make the system unbootable. Double‑check the UUID and syntax before updating GRUB.</p>
+
+				<p><strong>Legacy BIOS</strong></p>
+
+				<p class="red"><strong>Warning:</strong> Make sure to replace <code>sdY</code> with your actual device. Installing GRUB to the wrong device can prevent your system from booting.</p>
+
+<p class="note">Installs GRUB for BIOS systems.<br>
+- <code>--boot-directory=/boot</code> specifies where GRUB files go.<br>
+- Replace <code>/dev/sdY</code> with your actual target disk.</p>
+
+				<div class="codeblock">
+					<pre><code>grub-install --target=i386-pc --boot-directory=/boot /dev/sdY</code></pre>
+				</div>
+
+
+				<p class="note">Automatically generates the GRUB configuration file, detecting all kernels and operating systems.</p>
+				<div class="codeblock">
+					<pre><code>grub-mkconfig -o /boot/grub/grub.cfg</code></pre>
+				</div>
+
+
+				</div>
 			</section>
 
 			<section id="initramfs">
 				<h2>11 - mkinitcpio</h2>
 				<div class="codeblock">
+					<p class="note">Open the configuration file where you define which modules and hooks are included in the initramfs.</p>
 					<pre><code>nano /etc/mkinitcpio.conf</code></pre>
-<p class="note">Open the configuration file where you define which modules and hooks are included in the initramfs.</p>
 
+					<p class="note">Here, USB storage, USB keyboard, and USB controllers are included for proper hardware initialization.</p>
 					<pre><code>MODULES=(usb_storage usbhid xhci_pci ehci_pci)</code></pre>
-<p class="note">Here, USB storage, USB keyboard, and USB controllers are included for proper hardware initialization.</p>
 
-					<pre><code>HOOKS=(base udev keyboard autodetect microcode modconf kms keymap consolefont block encrypt filesystems fsck)</code></pre>
-<p class="note"><strong>HOOKS</strong> – Define the sequence of operations during boot. Important points:
-- <code>keyboard</code> before <code>autodetect</code> ensures the keyboard works for password entry.
+					<p class="note"><strong>HOOKS</strong> – Define the sequence of operations during boot. Important points:<br>
+- <code>keyboard</code> before <code>autodetect</code> ensures the keyboard works for password entry.<br>
 - <code>encrypt</code> before <code>filesystems</code> ensures encrypted volumes are unlocked before mounting.</p>
+					<pre><code>HOOKS=(base udev keyboard autodetect microcode modconf kms keymap consolefont block encrypt filesystems fsck)</code></pre>
 
-					<pre><code>mkinitcpio -P</code></pre>
 <p class="note">Rebuilds all preset initramfs images using the updated configuration, so the system boots
 with proper modules and hooks.</p>
+					<pre><code>mkinitcpio -P</code></pre>
 				</div>
-			</section>
-
-			<section id="grub-install">
-				<h2>12 - Install GRUB</h2>
-
-				<p><strong>UEFI</strong></p>
-				<div class="codeblock">
-					<pre><code>grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --removable --recheck</code></pre>
-<p class="note">Installs GRUB for UEFI systems.
-- <code>--efi-directory=/boot</code> specifies the EFI system partition.
-- <code>--bootloader-id=GRUB</code> names the boot entry.
-- <code>--removable</code> makes it bootable on removable media.
-- <code>--recheck</code> ensures device detection is refreshed.</p>
-				</div>
-
-				<p><strong>Legacy BIOS</strong></p>
-				<div class="codeblock">
-					<pre><code>grub-install --target=i386-pc --boot-directory=/boot /dev/sdY</code></pre>
-<p class="note">Installs GRUB for BIOS systems.
-- <code>--boot-directory=/boot</code> specifies where GRUB files go.
-- Replace <code>/dev/sdY</code> with your actual target disk.</p>
-				</div>
-
-				<p class="warn"><strong>Warning:</strong> Make sure to install for both <strong>UEFI</strong> and <strong>Legacy</strong> modes to ensure the USB boots on both.</p>
-
-				<p><strong>Generate GRUB configuration</strong></p>
-				<div class="codeblock">
-					<pre><code>grub-mkconfig -o /boot/grub/grub.cfg</code></pre>
-<p class="note">Automatically generates the GRUB configuration file, detecting all kernels and operating systems.</p>
-				</div>
-
-				<p class="red"><strong>Warning:</strong> Make sure to replace <code>sdY</code> with your actual device. Installing GRUB to the wrong device can prevent your system from booting.</p>
 			</section>
 
 			<section id="network">
-				<h2>13 - Networking, Hosts, and DNS</h2>
+				<h2>12 - Networking, Hosts, and DNS</h2>
 				<div class="codeblock">
-					<pre><code>systemctl enable systemd-networkd</code></pre>
-<p class="note">Enables the systemd network service at boot, which manages network interfaces automatically.</p>
 
-					<pre><code>systemctl enable systemd-resolved</code></pre>
-<p class="note">Provides DNS resolution and caching for the system, required for hostname lookups and internet connectivity.</p>
-
+					<p class="note">A higher-level tool to manage wired, wireless, and VPN connections with CLI or GUI tools.</p>
 					<pre><code>systemctl enable NetworkManager</code></pre>
-<p class="note">A higher-level tool to manage wired, wireless, and VPN connections with CLI or GUI tools.</p>
 
+<p class="note">Maps hostnames to IP addresses locally.<br>
+This ensures your system can resolve its own hostname and loopback addresses without querying DNS.</p>
 					<pre><code>host=$(cat /etc/hostname)
 sh -c "printf '127.0.0.1   localhost\n::1   localhost\n127.0.1.1   $host.localdomain   $host\n' > /etc/hosts"</code></pre>
-<p class="note">Maps hostnames to IP addresses locally.
-This ensures your system can resolve its own hostname and loopback addresses without querying DNS.</p>
-
-					<pre><code>sh -c 'printf "nameserver 8.8.8.8\nnameserver 1.1.1.1\n" >> /etc/resolv.conf'</code></pre>
-<p class="note"><strong>/etc/resolv.conf</strong> – Adds public DNS servers (Google and Cloudflare) for name resolution.
-To ensures the system can resolve domain names on the internet.</p>
 				</div>
 			</section>
 
 			<section id="desktop">
-				<h2>14 - Desktop Environment (optional)</h2>
+				<h2>13 - Desktop Environment (optional)</h2>
 				<div class="codeblock">
 					<pre><code>pacman -S xfce4 xfce4-goodies lightdm lightdm-gtk-greeter network-manager-applet \
 	  bluez bluez-utils wget curl git xdg-utils gvfs openssh alsa-utils \
 	  pipewire pipewire-pulse pavucontrol wireplumber unzip ntfs-3g rsync \
 	  noto-fonts-emoji noto-fonts-cjk noto-fonts-extra chromium arch-install-scripts \
 	  gparted reflector cups</code></pre>
+
+					<p class="note">These packages install XFCE, essential utilities, audio/video support, network management, Bluetooth, and common CLI tools for daily usage.</p>
 					<ul>
 						<li><strong>xfce4</strong> – XFCE desktop environment.</li>
 						<li><strong>xfce4-goodies</strong> – Additional XFCE plugins and tools.</li>
@@ -395,38 +392,37 @@ To ensures the system can resolve domain names on the internet.</p>
 						<li><strong>reflector</strong> – Updates/optimizes Arch Linux mirrors for faster package downloads.</li>
 						<li><strong>cups</strong> – A Printing system</li>
 					</ul>
-					<p class="note">These packages install XFCE, essential utilities, audio/video support, network management, Bluetooth, and common CLI tools for daily usage.</p>
 
+					<p class="note">Starts the display manager automatically at boot, providing a login screen.</p>
 					<pre><code>systemctl enable lightdm</code></pre>
-<p class="note">Starts the display manager automatically at boot, providing a login screen.</p>
 
+					<p class="note">Starts the Bluetooth service automatically at boot for device pairing and management.</p>
 					<pre><code>systemctl enable bluetooth</code></pre>
-<p class="note">Starts the Bluetooth service automatically at boot for device pairing and management.</p>
 
+					<p class="note">Starts the printing service automatically at boot</p>
 					<pre><code>systemctl enable cups</code></pre>
-<p class="note">Starts the printing service automatically at boot</p>
 				</div>
 			</section>
 
 			<section id="finish">
-				<h2>15 - Finish</h2>
+				<h2>14 - Finish</h2>
 				<div class="codeblock">
+
+					<p class="note">Leaving the chroot environment, returning to the live installer system.</p>
 					<pre><code>exit</code></pre>
-<p class="note"><strong>exit</strong> – Leaves the chroot environment, returning to the live installer system.</p>
 
+					<p class="note">Recursively unmounts all partitions mounted under <code>/mnt</code>, ensuring no filesystems are left mounted before shutdown.</p>
 					<pre><code>umount -R /mnt</code></pre>
-<p class="note">Recursively unmounts all partitions mounted under <code>/mnt</code>, ensuring no filesystems are left mounted before shutdown.</p>
 
+					<p class="note">Shuts down the installer system safely. After this, you can remove the installation media and boot your new system.</p>
 					<pre><code>poweroff</code></pre>
-<p class="note">Shuts down the installer system safely. After this, you can remove the installation media and boot your new system.</p>
 				</div>
-
 
 				<p class="warn"><strong>Warning:</strong> Remove the installer USB. Keep the target USB plugged in and boot from it. You should see the GRUB menu, then be prompted for your LUKS passphrase.</p>
 			</section>
 
 			<section id="post">
-				<h2>16 - Post Installation</h2>
+				<h2>15 - Post Installation</h2>
 				<div class="codeblock">
 					<p class="ok">After booting into the installed system, we need to perform some post-installation configuration.</p>
 
@@ -443,9 +439,9 @@ To ensures the system can resolve domain names on the internet.</p>
 					<pre><code>nano /etc/systemd/journald.conf.d/usbstick.conf</code></pre>
 
 					<p class="ok">Add the following lines to the file:</p>
-					<pre>[Journal]
+					<pre><code>[Journal]
 Storage=volatile
-RuntimeMaxUse=30M</pre>
+RuntimeMaxUse=30M</code></pre>
 
 					<p class="ok">Save the file and exit.</p>
 
@@ -454,8 +450,8 @@ RuntimeMaxUse=30M</pre>
 					<pre><code>pacman -S xf86-video-vesa xf86-video-ati xf86-video-intel xf86-video-amdgpu xf86-video-nouveau</code></pre>
 					<p class="ok">Let's set up <strong>YAY</strong>, the AUR helper.</p>
 
-					<pre><code>cd /tmp/ && git clone https://aur.archlinux.org/yay</code>
-<code>cd yay/ && makepkgs -si --noconfirm</code></pre>
+					<pre><code>cd /tmp/ && git clone https://aur.archlinux.org/yay
+cd yay/ && makepkg -si --noconfirm</code></pre>
 					<p class="ok">And now you can just use <strong>yay</strong> instead of <strong>pacman</strong>.</p>
 					<pre><code>yay -Syu</code>
 <code>yay -S fastfetch</code>
