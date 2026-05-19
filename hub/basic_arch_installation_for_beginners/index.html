@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Basic Arch Linux Installation for Beginners</title>
+		<link rel="stylesheet" href="style.css">
+		<link rel="icon" type="image/png" sizes="16x16" href="images/hub/arch_for_beginners/favicon-16x16.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="images/hub/arch_for_beginners/favicon-32x32.png">
+	</head>
+	<body>
+		<header>
+			<h1 class="title">Basic Arch Linux Installation for Beginners</h1>
+			<p class="subtitle">A concise, step‑by‑step guide.</p>
+			<div class="badge">
+				<span>Target: sdY/nvmeY drive</span>
+				<span>FS: Ext4</span>
+				<span>Boot: UEFI</span>
+			</div>
+		</header>
+
+		<nav class="toc" aria-label="Table of contents">
+			<div class="toc-inner">
+				<h2>Contents</h2>
+				<ol>
+					<li><a href="#iso">Download & verify ISO</a></li>
+					<li><a href="#live-usb">Create installer USB</a></li>
+					<li><a href="#connect-wifi">Connect to the Internet</a></li>
+					<li><a href="#partition">Partition target Drive</a></li>
+					<li><a href="#fs">Create filesystems</a></li>
+					<li><a href="#ext4">Mount the filesystem</a></li>
+					<li><a href="#install">Install base system</a></li>
+					<li><a href="#fstab">Generate fstab</a></li>
+					<li><a href="#config">System configuration</a></li>
+					<li><a href="#grub-install">Install GRUB</a></li>
+					<li><a href="#network">Networking</a></li>
+					<li><a href="#hosts">Hosts</a></li>
+					<li><a href="#finish">Finish</a></li>
+					<li><a href="#post">Post Installation</a></li>
+				</ol>
+			</div>
+		</nav>
+
+		<main>
+			<section id="iso">
+				<h2>1 - Download & verify ISO</h2>
+				<p>Download the latest ISO from <a href="https://archlinux.org/">archlinux.org</a>. Verify it with the official checksum.</p>
+
+				<div class="codeblock">
+					<pre><code>sha256sum archlinux-2025.05.01-x86_64.iso</code></pre>
+				</div>
+				<p class="ok"><strong>Tip:</strong> Ensure the hash matches the one published on the website.</p>
+			</section>
+
+			<section id="live-usb">
+				<h2>2 - Create installer USB</h2>
+				<p>On Linux, find your device with <strong><code>lsblk</code></strong> and write the ISO with <code>dd</code>. On Windows, use Rufus.</p>
+				<div class="grid cols-2">
+					<div class="card">
+						<p><strong>Linux</strong></p>
+						<div class="codeblock">
+							<pre><code>lsblk</code></pre>
+							<pre><code>sudo dd if=archlinux-2025.05.01-x86_64.iso of=/dev/sdX status=progress bs=4M conv=fsync</code></pre>
+						</div>
+						<p class="warn">Replace <code>/dev/sdX</code> with your installer USB device.</p>
+						<p class="red"><strong>Warning:</strong> Make sure that your USB drives do not contain any important data.</p>
+					</div>
+					<br>
+					<div class="card">
+						<p><strong>Windows</strong></p>
+						<p>Use <a href="https://rufus.ie">Rufus</a> to write the ISO to your USB drive.</p>
+					</div>
+				</div>
+			</section>
+
+			<section id="connect-wifi">
+				<h2>3 - Connect to the Internet</h2>
+				<p>Now plug in the USB installer and boot from it.</p>
+				<p class="warn">This next step is only necessary if you are using a <strong>Wi-Fi connection</strong>. If you are using <strong>Ethernet</strong>, you can skip it.</p>
+				<p>Let’s connect to the internet using <code>iwctl</code>:</p>
+				<ol>
+					<li>Detect any Wi-Fi adapters:</li>
+					<div class="codeblock">
+						<pre><code>iwctl device list</code></pre>
+					</div>
+					<p>You should see a wireless interface (e.g., <code>wlan0</code> or similar).</p>
+
+					<li>Scan for nearby networks:</li>
+					<div class="codeblock">
+						<pre><code>iwctl station wlan0 scan</code></pre>
+					</div>
+
+					<li>List available networks:</li>
+					<div class="codeblock">
+						<pre><code>iwctl station wlan0 get-networks</code></pre>
+					</div>
+
+					<li>Connect to your Wi-Fi:</li>
+					<div class="codeblock">
+						<pre><code>iwctl station wlan0 connect SSID</code></pre>
+					</div>
+					<p>Replace <code>SSID</code> with your Wi-Fi network name, press <kbd>ENTER</kbd>, type your passphrase, and exit <strong>iwctl</strong> with <code>exit</code>.</p>
+
+					<li>Test your connection:</li>
+					<div class="codeblock">
+						<pre><code>ping -c3 archlinux.org</code></pre>
+					</div>
+					<p class="note">You should see some packets being sent and received.</p>
+				</ol>
+			</section>
+
+			<section id="partition">
+				<h2>4 - Partition target Drive</h2>
+				<div class="ok">
+
+					<h4>Example for a 120 GiB Drive</h4>
+					<ul>
+						<li>EFI partition: 1 GiB</li>
+						<li>Root partition: 118 GiB</li>
+					</ul>
+
+				</div>
+				<p>Create two partitions on the <em>target</em> Drive (120GiB):</p>
+				<table>
+					<thead>
+						<tr><th>#</th><th>Purpose</th><th>Size</th><th>Type / FS</th><th>Mount</th></tr>
+					</thead>
+					<tbody>
+						<tr><td>1</td><td>UEFI system</td><td>1&nbsp;GiB</td><td>vfat (FAT32)</td><td>/boot</td></tr>
+						<tr><td>2</td><td>Root</td><td>118&nbsp;GiB</td><td>Ext4</td><td>/</td></tr>
+					</tbody>
+				</table>
+
+				<br>
+
+				<p class="ok">Open the target drive with <strong>cfdisk</strong>, you need to create two partitions, an <strong>EFI</strong> partition and a <strong>root</strong> partition.</p>
+
+				<p class="red"><strong>Warning:</strong> Double‑check the target device (e.g. <code>/dev/sdY</code>) with <strong><code>lsblk</code></strong> to avoid wiping the wrong disk.</p>
+				<div class="codeblock">
+					<pre><code>cfdisk /dev/sdY</code></pre>
+				</div>
+			</section>
+
+			<section id="fs">
+				<h2>5 - Create Filesystems</h2>
+				<p>Now that the partitions are ready, we need to format them with appropriate filesystems.</p>
+
+				<div class="codeblock">
+
+					<p class="note">Formats the first partition as FAT32. This is typically used for EFI System Partitions.</p>
+					<pre><code>mkfs.vfat -F32 /dev/sdY1</code></pre>
+
+					<p class="note">Formats the second partition (root partition) with the Ext4 filesystem.</p>
+					<pre><code>mkfs.ext4 /dev/sdY2</code></pre>
+
+				</div>
+			</section>
+
+			<section id="ext4">
+				<h2>6 - Mount the Filesystem</h2>
+				<p>Next, we mount the root filesystem, the EFI partition.</p>
+
+				<div class="codeblock">
+					<p class="note">Mounts the second partition (root partition) to <code>/mnt</code>.</p>
+					<pre><code>mount /dev/sdY2 /mnt</code></pre>
+
+					<p class="note">Mounts the EFI system partition at <code>/mnt/boot</code>.</p>
+					<pre><code>mount --mkdir /dev/sdY1 /mnt/boot</code></pre>
+
+					<p class="note">Lists the partitions, filesystems, and mount points to verify everything is set up correctly.</p>
+					<pre><code>lsblk -pf /dev/sdY</code></pre>
+				</div>
+			</section>
+
+			<section id="install">
+				<h2>7 - Install Base System</h2>
+				<div class="codeblock">
+					<pre><code>pacstrap -K /mnt linux linux-firmware linux-headers base base-devel nano \
+		networkmanager grub efibootmgr os-prober bash-completion dosfstools</code></pre>
+					<p class="note"><strong>Tip:</strong> You will need to add your CPU microcode package: for Intel, add <code>intel-ucode</code>; for AMD, add <code>amd-ucode</code>.</p>
+					<hr>
+					<ul>
+						<li><strong>linux</strong> – The Linux kernel.</li>
+						<li><strong>linux-firmware</strong> – Firmware files for various hardware devices.</li>
+						<li><strong>linux-headers</strong> – Kernel headers for building modules against the kernel.</li>
+						<li><strong>base</strong> – Essential packages for a minimal Arch Linux system.</li>
+						<li><strong>base-devel</strong> – Development tools for compiling software (make, gcc, etc.).</li>
+						<li><strong>nano</strong> – Simple terminal text editor.</li>
+						<li><strong>networkmanager</strong> – Network management daemon and CLI tools.</li>
+						<li><strong>grub</strong> – Bootloader to start the OS.</li>
+						<li><strong>efibootmgr</strong> – EFI boot manager to configure UEFI boot entries.</li>
+						<li><strong>os-prober</strong> – Detects other OS installations for bootloader configuration.</li>
+						<li><strong>bash-completion</strong> – Bash completions for core commands.</li>
+						<li><strong>dosfstools</strong> – Tools.</li>
+						<li><strong>intel-ucode</strong> – Microcode updates for Intel CPUs.</li>
+						<li><strong>amd-ucode</strong> – Microcode updates for AMD CPUs.</li>
+					</ul>
+				</div>
+			</section>
+
+			<section id="fstab">
+				<h2>8 - Generate the Fstab</h2>
+					<p class="note">Generates the <code>fstab</code> file using UUIDs (-U) for all mounted partitions under <code>/mnt</code>, and writes it to <code>/mnt/etc/fstab</code>. This file tells the system which partitions to mount at boot.</p>
+				<div class="codeblock">
+					<pre><code>genfstab -U /mnt &gt; /mnt/etc/fstab</code></pre>
+				</div>
+			</section>
+
+			<section id="config">
+				<h2>9 - System Configuration</h2>
+				<div class="codeblock">
+					<p class="note">Enters the new system environment at <code>/mnt</code>, so all following commands affect the installed system, not the live USB.</p>
+					<pre><code>arch-chroot /mnt</code></pre>
+
+					<p class="note">Sets the system name to <code>zombie</code>, Change it to your own hostname, which identifies your computer on networks.</p>
+					<pre><code>echo "zombie" &gt; /etc/hostname</code></pre>
+
+					<p class="note">Use the command with your city name to find your timezone.<br>
+You can then use its output in the next command that links your local timezone file to <code>/etc/localtime</code> for correct system time.</p>
+					<pre><code>timedatectl list-timezones | grep Tokyo</code></pre>
+
+					<pre><code>ln -sf /usr/share/zoneinfo/Japan/Tokyo /etc/localtime</code></pre>
+
+					<p class="note">Writes the system time to the hardware clock so it stays accurate after reboots.</p>
+					<pre><code>hwclock --systohc</code></pre>
+
+					<p class="note">Uncomment the locale you want to use by removing the <strong>#</strong> in this example it's <code><strong>en_US.UTF-8 UTF-8</strong></code> and then save the file.</p>
+					<pre><code>nano /etc/locale.gen</code></pre>
+
+					<p class="note">Generates the locale files specified in <code>/etc/locale.gen</code>.</p>
+					<pre><code>locale-gen</code></pre>
+
+					<p class="note">Change the <code>en_US.UTF-8</code> to the locale you uncommented in the <code>/etc/locale.gen</code> file.</p>
+					<pre><code>echo "LANG=en_US.UTF-8" &gt; /etc/locale.conf</code></pre>
+
+					<p class="note">Add your own keymap by changing <code>us</code> to your keyboard layout.</p>
+					<pre><code>echo "KEYMAP=us" &gt; /etc/vconsole.conf</code></pre>
+
+					<p class="note">Prompts to set a strong password for the root account.</p>
+					<pre><code>passwd</code></pre>
+
+					<p class="note">Creates the user with a home directory and adds them to the <code>wheel</code> group for administrative privileges.<br>
+					Replace <code>&lt;yourUserName&gt;</code> with your own username.</p>
+					<pre><code>useradd -mG wheel &lt;yourUserName&gt;</code></pre>
+
+					<p class="note">Sets the password for your new user account.</p>
+					<pre><code>passwd &lt;yourUserName&gt;</code></pre>
+
+					<p class="note">This allows users in the <code>wheel</code> group to use <code>sudo</code> for administrative tasks.
+					Uncomment the line at the bottom of the file by removing the <strong>#</strong> from: <strong>%wheel ALL=(ALL) ALL</strong> and save the file.</p>
+					<pre><code>EDITOR=nano visudo</code></pre>
+				</div>
+			</section>
+
+			<section id="grub-install">
+				<h2>10 - Install GRUB</h2>
+
+				<div class="codeblock">
+					<pre><code>grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --recheck</code></pre>
+					<p class="note"><code>--target=x86_64-efi</code> installs GRUB for UEFI systems.
+					<br>
+					<code>--efi-directory=/boot</code> specifies the EFI system partition.
+					<br>
+					<code>--bootloader-id=GRUB</code> names the boot entry.
+					<br>
+					<code>--recheck</code> ensures device detection is refreshed.</p>
+				</div>
+
+				<p><strong>Generate GRUB configuration</strong></p>
+				<div class="codeblock">
+
+					<p class="note">Automatically generates the GRUB configuration file, detecting all kernels and operating systems.</p>
+					<pre><code>grub-mkconfig -o /boot/grub/grub.cfg</code></pre>
+				</div>
+
+			</section>
+
+			<section id="network">
+				<h2>11 - Networking</h2>
+
+					<h3>Using NetworkManager</h3>
+
+					<p class="note">
+					NetworkManager handles wired, wireless, and VPN connections.<br>
+					It also manages DNS automatically.</p>
+
+					<pre><code>systemctl enable NetworkManager</code></pre>
+
+					<p class="note">After installing the system and rebooting, to connect to your Wi-Fi network, just run <code>sudo nmtui</code> and select your Wi-Fi network. As for Ethernet, it should connect automatically if the Ethernet cable is plugged in.</p>
+
+			</section>
+
+			<section id="hosts">
+					<h2>12 - Hosts</h2>
+				<div class="codeblock">
+					<p>Edit <strong><code>/etc/hosts</code></strong> with <code>nano</code> and add:</p>
+					<pre><code>127.0.0.1   localhost
+::1         localhost
+127.0.1.1   YourHostName.localdomain   YourHostName</code></pre>
+					<p class="note">
+					Replace <strong>YourHostName</strong> with your system’s hostname.<br>
+					Maps hostnames to IP addresses locally, ensuring your system can resolve its own hostname without querying DNS.
+					</p>
+
+				</div>
+			</section>
+
+			<section id="finish">
+				<h2>14 - Finish</h2>
+				<div class="codeblock">
+					<p class="note">Leaves the chroot environment, returning to the live installer system.</p>
+					<pre><code>exit</code></pre>
+
+					<p class="note">Reboot the system. Remove the installation media</p>
+					<pre><code>reboot</code></pre>
+				</div>
+
+			</section>
+
+				<section id="post">
+					<h2>15 - Post Installation</h2>
+					<pre><code>sudo pacman -S fastfetch</code></pre>
+<pre><code>fastfetch</code></pre>
+				</section>
+
+				<section>
+					<p class="ok"><strong>Et voilà!</strong> You now have installed Arch Linux.</p>
+				</section>
+
+				<br>
+
+		</main>
+	</body>
+</html>
