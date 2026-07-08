@@ -42,8 +42,8 @@
 			</section>
 
 			<section>
-				<h2>Step 7: Add to /etc/fstab</h2>
-				<p>Add this line to <strong><code>/etc/fstab</code></strong> to enable swap at boot</p>
+				<h2>Step 7: Add the swap file to <code>/etc/fstab</code></h2>
+				<p>Edit <strong><code>sudo nano /etc/fstab</code></strong> and add the following line to enable the swap file at boot:</p>
 				<pre><code>/swapfile none swap defaults 0 0</code></pre>
 
 				<p>After that, reboot the system and check with <code>free -h</code>. You should see the swap size you created appear.</p>
