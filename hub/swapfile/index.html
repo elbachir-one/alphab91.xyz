@@ -1,58 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>How to Create a Swap File</title>
-		<link rel="stylesheet" href="style.css">
-	</head>
-	<body>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>How to Create a Swap File</title>
 
-		<div class="container">
-			<h1>How to Create a Swap File</h1>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-			<section>
-				<h2>Step 1: Turn off existing swap</h2>
-				<pre><code>sudo swapoff /swapfile</code></pre>
-			</section>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-			<section>
-				<h2>Step 2: Create a new swap file (example: 4 GB)</h2>
-				<pre><code>sudo fallocate -l 8G /swapfile</code></pre>
-			</section>
+	<div class="container">
 
-			<section>
-				<h2>Step 3: Set correct permissions</h2>
-				<pre><code>sudo chmod 600 /swapfile</code></pre>
-			</section>
+		<header>
+			<h1>Create a Linux Swap File</h1>
+			<p class="subtitle">
+				A quick guide to creating and enabling a swap file.
+			</p>
+		</header>
 
-			<section>
-				<h2>Step 4: Make it a swap area</h2>
-				<pre><code>sudo mkswap /swapfile</code></pre>
-			</section>
+		<section>
+			<h2>① Turn off existing swap</h2>
+			<pre><code>sudo swapoff /swapfile</code></pre>
+		</section>
 
-			<section>
-				<h2>Step 5: Enable the swap file</h2>
-				<pre><code>sudo swapon /swapfile</code></pre>
-			</section>
+		<section>
+			<h2>② Create a new swap file (8 GB)</h2>
+			<pre><code>sudo fallocate -l 8G /swapfile</code></pre>
+		</section>
 
-			<section>
-				<h2>Step 6: Verify</h2>
-				<pre><code>free -h</code></pre>
-			</section>
+		<section>
+			<h2>③ Set correct permissions</h2>
+			<pre><code>sudo chmod 600 /swapfile</code></pre>
+		</section>
 
-			<section>
-				<h2>Step 7: Add the swap file to <code>/etc/fstab</code></h2>
-				<p>Edit <strong><code>/etc/fstab</code></strong> and add the following line to enable the swap file at boot</p>
-				<pre><code>/swapfile none swap defaults 0 0</code></pre>
+		<section>
+			<h2>④ Format it as swap</h2>
+			<pre><code>sudo mkswap /swapfile</code></pre>
+		</section>
 
-				<p>After that, reboot the system and check with <strong><code>free -h</code></strong>. You should see the swap size you created appear.</p>
-			</section>
-		</div>
+		<section>
+			<h2>⑤ Enable the swap file</h2>
+			<pre><code>sudo swapon /swapfile</code></pre>
+		</section>
 
-		<footer>
-			<p><strong>Et voilà</strong></p>
-		</footer>
+		<section>
+			<h2>⑥ Verify</h2>
+			<pre><code>free -h</code></pre>
+		</section>
 
-	</body>
+		<section>
+			<h2>⑦ Enable it at boot</h2>
+
+			<p>Edit <code>/etc/fstab</code> and add the following line</p>
+
+			<pre><code>/swapfile none swap defaults 0 0</code></pre>
+
+			<p>
+				After rebooting, run <code>free -h</code> again to verify
+				that your swap file is active.
+			</p>
+		</section>
+
+	</div>
+
+	<footer>
+		✨ Et voilà!
+	</footer>
+
+</body>
 </html>
