@@ -55,9 +55,7 @@
 		<section>
 			<h2>⑦ Enable it at boot</h2>
 
-			<p>Edit <code>/etc/fstab</code> and add the following line</p>
-
-			<pre><code>/swapfile none swap defaults 0 0</code></pre>
+			<pre><code>echo '/swapfile none swap defaults 0 0' | sudo tee -a /etc/fstab</code></pre>
 
 			<p>
 				After rebooting, run <code>free -h</code> again to verify
