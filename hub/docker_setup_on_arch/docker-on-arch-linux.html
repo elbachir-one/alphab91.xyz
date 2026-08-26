@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<meta name="description" content="A guide to installing and using Docker on Arch Linux.">
+		<title>Starting Docker on Arch Linux</title>
+		<link rel="stylesheet" href="docker-on-arch-linux.css">
+	</head>
+
+	<body>
+		<header class="hero">
+			<div class="container">
+				<h1>Starting Docker on Arch Linux</h1>
+				<p class="lead">A simple guide to installing, configuring, and using Docker.</p>
+			</div>
+		</header>
+
+		<main class="container content">
+			<nav class="tabs">
+				<button class="tab active" onclick="showTab('basics')">Basics</button>
+				<button class="tab" onclick="showTab('install')">Installation</button>
+				<button class="tab" onclick="showTab('usage')">Usage</button>
+				<button class="tab" onclick="showTab('compose')">Compose</button>
+				<button class="tab" onclick="showTab('security')">Best Practices</button>
+			</nav>
+
+			<article>
+				<section id="basics" class="tab-content active">
+					<h2>Fundamental Concepts</h2>
+
+					<h3>What is Docker?</h3>
+					<p>
+						Docker lets you package and run applications inside lightweight,
+						isolated containers. Containers share the host's Linux kernel,
+						making them generally faster and lighter than virtual machines.
+					</p>
+
+					<h3>Key Components</h3>
+					<ul>
+						<li><strong>Docker Engine:</strong> Runs and manages containers.</li>
+						<li><strong>Docker CLI:</strong> The <code>docker</code> command.</li>
+						<li><strong>Images:</strong> Templates used to create containers.</li>
+						<li><strong>Containers:</strong> Running instances of images.</li>
+						<li><strong>Registry:</strong> Stores and distributes images.</li>
+						<li><strong>Compose:</strong> Manages multi-container applications.</li>
+					</ul>
+				</section>
+
+				<section id="install" class="tab-content">
+					<h2>Installation</h2>
+
+					<h3>Update Your System</h3>
+					<pre><code>sudo pacman -Syu</code></pre>
+
+					<h3>Install Docker</h3>
+					<p>Docker is available directly from the official Arch repositories.</p>
+					<pre><code>sudo pacman -S docker</code></pre>
+
+					<h3>Install Docker Compose</h3>
+					<pre><code>sudo pacman -S docker-compose
+docker compose version</code></pre>
+
+					<h3>Start Docker</h3>
+					<pre><code>sudo systemctl enable --now docker</code></pre>
+
+					<h3>Verify the Installation</h3>
+					<pre><code>systemctl is-active docker
+docker version
+sudo docker run hello-world</code></pre>
+
+					<h3>Use Docker Without sudo</h3>
+					<pre><code>sudo usermod -aG docker "$USER"</code></pre>
+
+					<p>Log out and back in before using Docker without <code>sudo</code>.</p>
+
+					<blockquote>
+						<strong>Security:</strong> Membership in the <code>docker</code>
+						group effectively gives root-level control over the host.
+					</blockquote>
+				</section>
+
+				<section id="usage" class="tab-content">
+					<h2>Using Docker</h2>
+
+					<h3>Run a Container</h3>
+					<pre><code>docker run -d --name web -p 8080:80 nginx</code></pre>
+
+					<p>
+						This runs Nginx in the background and maps port
+						<code>8080</code> on the host to port <code>80</code>.
+					</p>
+
+					<h3>List Containers</h3>
+					<pre><code>docker ps
+docker ps -a</code></pre>
+
+					<h3>Stop and Remove Containers</h3>
+					<pre><code>docker stop &lt;container&gt;
+docker rm &lt;container&gt;
+docker rm -f &lt;container&gt;</code></pre>
+
+					<h3>Manage Images</h3>
+					<pre><code>docker images
+docker pull nginx
+docker rmi &lt;image&gt;</code></pre>
+
+					<h3>Clean Up</h3>
+					<pre><code>docker system df
+docker system prune</code></pre>
+
+					<p>Be careful with cleanup commands because unused resources may still be needed.</p>
+				</section>
+
+				<section id="compose" class="tab-content">
+					<h2>Docker Compose</h2>
+
+					<p>
+						Compose is useful for applications that require multiple
+						containers, such as a web server and database.
+					</p>
+
+					<h3>Example <code>compose.yaml</code></h3>
+					<pre><code>services:
+  web:
+    image: nginx:latest
+    ports:
+      - "8080:80"</code></pre>
+
+					<h3>Compose Commands</h3>
+					<pre><code>docker compose up -d
+docker compose ps
+docker compose logs
+docker compose down</code></pre>
+
+					<p>
+						Modern Compose files do not require a top-level
+						<code>version</code> field.
+					</p>
+				</section>
+
+				<section id="security" class="tab-content">
+					<h2>Best Practices</h2>
+
+					<h3>Images</h3>
+					<ul>
+						<li>Use official or trusted images.</li>
+						<li>Pin versions when reproducibility matters.</li>
+						<li>Keep images small.</li>
+						<li>Update images regularly.</li>
+					</ul>
+
+					<h3>Security</h3>
+					<ul>
+						<li>Avoid <code>--privileged</code> unless necessary.</li>
+						<li>Don't expose unnecessary ports.</li>
+						<li>Avoid unnecessary host mounts.</li>
+						<li>Never put secrets inside Dockerfiles or images.</li>
+						<li>Keep Docker and the host updated.</li>
+					</ul>
+
+					<h3>Resource Limits</h3>
+					<p>Containers share the host's CPU and memory. Limits can be applied when needed:</p>
+
+					<pre><code>docker run -d --memory=512m nginx
+docker run -d --cpus=1 nginx</code></pre>
+				</section>
+			</article>
+
+			<section class="references">
+				<h2>References</h2>
+				<ul>
+					<li><a href="https://docs.docker.com/">Docker Documentation</a></li>
+					<li><a href="https://docs.docker.com/compose/">Docker Compose</a></li>
+					<li><a href="https://wiki.archlinux.org/title/Docker">Arch Linux Wiki</a></li>
+					<li><a href="https://hub.docker.com/">Docker Hub</a></li>
+				</ul>
+			</section>
+		</main>
+
+		<footer>
+			<div class="container">
+				<p>Made by A L P H A</p>
+			</div>
+		</footer>
+
+		<script src="docker-on-arch-linux.js"></script>
+	</body>
+</html>
