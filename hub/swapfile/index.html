@@ -22,6 +22,18 @@
 			</p>
 		</header>
 
+		<section class="note">
+			<p>
+			<strong>Note:</strong> This guide is only for filesystems other than
+			<strong>Btrfs</strong>. Check with <strong><code>findmnt -no FSTYPE /</code></strong>. 
+			If you are using Btrfs, see the
+			<a href="https://wiki.archlinux.org/title/Btrfs#Swap_file">
+				Arch Wiki: Btrfs Swap file
+			</a>
+			instead.
+			</p>
+		</section>
+
 		<section>
 			<h2>① Turn off existing swap</h2>
 			<pre><code>sudo swapoff /swapfile</code></pre>
