@@ -44,7 +44,7 @@
 		<main>
 			<section id="iso">
 				<h2>1 - Download & verify ISO</h2>
-				<p>Download the latest ISO from <a href="https://archlinux.org/">archlinux.org</a>. Verify it with the official checksum.</p>
+				<p>Download the latest ISO from <a href="https://archlinux.org/download/">Arch Linux</a>. Verify it with the official checksum.</p>
 
 				<div class="codeblock">
 					<pre><code>sha256sum archlinux-*-x86_64.iso</code></pre>
@@ -68,7 +68,7 @@
 					<br>
 					<div class="card">
 						<p><strong>Windows</strong></p>
-						<p>Use <a href="https://rufus.ie">Rufus</a> to write the ISO to your USB drive.</p>
+						<p>Use <a href="https://rufus.ie">Rufus</a> Or <a href="https://www.ventoy.net/en/index.html">Ventoy</a> to write the ISO to your USB drive.</p>
 					</div>
 				</div>
 			</section>
@@ -279,15 +279,11 @@ You can then use its output in the next command that links your local timezone f
 			<section id="network">
 				<h2>11 - Networking</h2>
 
-					<h3>Using NetworkManager</h3>
-
 					<p class="note">
-					NetworkManager handles wired, wireless, and VPN connections.<br>
+					<strong>NetworkManager</strong> handles wired, wireless, and VPN connections.<br>
 					It also manages DNS automatically.</p>
 
 					<pre><code>systemctl enable NetworkManager</code></pre>
-
-					<p class="note">After installing the system and rebooting, to connect to your Wi-Fi network, just run <code>sudo nmtui</code> and select your Wi-Fi network. As for Ethernet, it should connect automatically if the Ethernet cable is plugged in.</p>
 
 			</section>
 
@@ -299,8 +295,8 @@ You can then use its output in the next command that links your local timezone f
 ::1         localhost
 127.0.1.1   YourHostName.localdomain   YourHostName</code></pre>
 					<p class="note">
-					Replace <strong>YourHostName</strong> with your system’s hostname.<br>
-					Maps hostnames to IP addresses locally, ensuring your system can resolve its own hostname without querying DNS.
+					Replace <strong>YourHostName</strong> with the system hostname you configured earlier.<br>
+					The point of the <strong>hosts</strong> file is that it maps hostnames to IP addresses locally, allowing your system to resolve its own hostname without querying DNS.
 					</p>
 
 				</div>
@@ -309,10 +305,11 @@ You can then use its output in the next command that links your local timezone f
 			<section id="finish">
 				<h2>13 - Finish</h2>
 				<div class="codeblock">
+
 					<p class="note">Leaves the chroot environment, returning to the live installer system.</p>
 					<pre><code>exit</code></pre>
 
-					<p class="note">Reboot the system. Remove the installation media</p>
+					<p class="note">Reboot the system. Remove the installation media (USB)</p>
 					<pre><code>reboot</code></pre>
 				</div>
 
@@ -320,6 +317,10 @@ You can then use its output in the next command that links your local timezone f
 
 				<section id="post">
 					<h2>14 - Post Installation</h2>
+					<p class="note">
+					After rebooting and booting into your newly installed system, log in with your username and enter your password. After that, to connect to your Wi-Fi network, run <strong><code>sudo nmtui</code></strong>, select <strong><code>Activate a connection</code></strong>, find your Wi-Fi network, and connect to it. As for Ethernet, you don't need to do anything; it should connect automatically when you boot the system. Just make sure the Ethernet cable is plugged in.
+					</p>
+
 					<pre><code>sudo pacman -S fastfetch</code></pre>
 <pre><code>fastfetch</code></pre>
 				</section>
