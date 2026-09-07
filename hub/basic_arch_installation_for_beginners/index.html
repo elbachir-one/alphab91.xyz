@@ -175,9 +175,8 @@
 			<section id="install">
 				<h2>7 - Install Base System</h2>
 				<div class="codeblock">
-					<pre><code>pacstrap -K /mnt linux linux-firmware linux-headers base base-devel nano \
-		networkmanager grub efibootmgr os-prober bash-completion dosfstools reflector</code></pre>
-					<p class="note"><strong>Tip:</strong> You will need to add your CPU microcode package: for Intel, add <code>intel-ucode</code>; for AMD, add <code>amd-ucode</code>.</p>
+					<pre><code>pacstrap -K /mnt linux linux-firmware linux-headers base base-devel nano networkmanager grub efibootmgr os-prober bash-completion dosfstools reflector</code></pre>
+					<p class="note"><strong>Tip:</strong> You will need to add your CPU microcode package: for Intel, add <strong><code>intel-ucode</code></strong>; for AMD, add <strong><code>amd-ucode</code></strong>.</p>
 					<hr>
 					<ul>
 						<li><strong>linux</strong> – The Linux kernel.</li>
